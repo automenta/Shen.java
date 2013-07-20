@@ -3,9 +3,15 @@ package shen;
 import org.junit.Test;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import static java.lang.System.out;
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static shen.Shen.Numbers.asNumber;
+import static shen.Shen.Numbers.isInteger;
 import static shen.Shen.Primitives.*;
 import static shen.Shen.eval;
 
@@ -107,5 +113,59 @@ public class SmokeTest {
         out.println(eval("(cond (true ()) (false 2))"));
         out.println(eval("(if (<= 3 3) x y)"));
         out.println(eval("(eval-kl (cons + (cons 1 (cons 2 ()))))"));
+    }
+
+    /*
+        This tests a function which is recursive and which uses the let keyword. e.g.
+
+            (define funcLetAndRecurse
+              X -> (let Z (- X 1)
+                     (if (= Z 1) (* 3 X) (funcLetAndRecurse Z))
+                   )
+            )
+
+        This function returns 6
+
+        In the function below we use the Klambda code which is :
+
+        (defun funcLetAndRecurse (V503) (let Z (- V503 1) (if (= Z 1) (* 3 V503) (funcLetAndRecurse Z))))
+    */
+    @Test
+    public void other() throws Throwable {
+        String funcDef1 = "(defun funcLetAndRecurse (V503) (let Z (- V503 1) (if (= Z 1) (* 3 V503) (funcLetAndRecurse Z))))";
+        String funcCall = "(funcLetAndRecurse 10)";
+
+        //tests  that let and recurse works fine when combined together
+        eval(funcDef1);
+        is(6L, funcCall);
+
+        //tests that second call gives same answer as first
+        is(6L, funcCall);
+
+        //this tests that redefinition works
+        String funcDef2 = " (defun funcLetAndRecurse (V503) (let Z (- V503 1) (if (= Z 1) (* 2 V503) (funcLetAndRecurse Z))))";
+        eval(funcDef2);
+        is(4L, funcCall);
+    }
+
+    void is(Object expected, String actual) {
+        Object 神 = 神(actual);
+        if (expected instanceof Class)
+            if (expected == Double.class) assertThat(isInteger((Long) 神), equalTo(false));
+            else assertThat(神, instanceOf((Class<?>) expected));
+        else if (神 instanceof Long)
+            assertThat(asNumber((Long) 神), equalTo(expected));
+        else if (神 instanceof Shen.Cons && expected instanceof List)
+            assertThat(((Shen.Cons) 神).toList(), equalTo(expected));
+        else
+            assertThat(神, equalTo(expected));
+    }
+
+    Object 神(String shen) {
+        try {
+            return eval(shen);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
     }
 }

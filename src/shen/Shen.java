@@ -828,7 +828,9 @@ public class Shen {
                 site.setTarget(symbol.fnGuard.guardWithTest(match.asType(type), fallback));
             }
             Object result = match.invokeWithArguments(args);
-            maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
+            try{
+                maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
+            }catch(Exception e){ }
             return result;
         }
 
@@ -920,6 +922,9 @@ public class Shen {
                 MethodHandle target = candidates.get(i - 1);
                 Class<?> differentType = find(target.type().parameterList(), fallback.type().parameterList(), (x, y) -> !x.equals(y));
                 int firstDifferent = target.type().parameterList().indexOf(differentType);
+                if(firstDifferent == -1){
+                    firstDifferent = 0;
+                }
                 debug("switching on %d argument type %s", firstDifferent, differentType);
                 debug("target: %s ; fallback: %s", target, fallback);
                 MethodHandle test = checkClass.bindTo(differentType);
@@ -938,7 +943,11 @@ public class Shen {
         }
 
         public static boolean checkClass(Class<?> xClass, Object x) {
-            return canCastStrict(x.getClass(), xClass);
+            if(xClass != null){
+                return canCastStrict(x.getClass(), xClass);
+            }else{
+                return false;
+            }
         }
 
         static MethodHandle relinkOn(Class<? extends Throwable> exception, MethodHandle fn, MethodHandle fallback) {
