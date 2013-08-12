@@ -105,7 +105,7 @@
    preclude 1 preclude-all-but 1 protect 1 address-> 3 put 4 reassemble 2 read-file-as-string 1 read-file 1 
    read 1 read-byte 1 read-from-string 1 remove 2 reverse 1 set 2 simple-error 1 snd 1 specialise 1 spy 1 
    step 1 stinput 0 stoutput 0 string->n 1 string->symbol 1 string? 1 strong-warning 1 subst 3 sum 1
-   symbol? 1 tail 1 tl 1 tc 1 tc? 1 thaw 1 tlstr 1 track 1 trap-error 2 tuple? 1 type 1 return 3 
+   symbol? 1 tail 1 tl 1 tc 1 tc? 0 thaw 1 tlstr 1 track 1 trap-error 2 tuple? 1 type 1 return 3 
    undefmacro 1 unprofile 1 unify 4 unify! 4 union 2 untrack 1 unspecialise 1 undefmacro 1 vector 1 
    vector-> 3 value 1 variable? 1 version 1 warn 1 write-byte 2 write-to-file 2 y-or-n? 1 + 2 * 2 / 2 - 2 == 2 <e> 1
    @p 2 @v 2 @s 2 preclude 1 include 1 preclude-all-but 1 include-all-but 1 where 2])

@@ -123,7 +123,6 @@
   (mode [open FileName Direction] -) [stream Direction] Hyp <-- ! (th* FileName string Hyp);
   (mode [type X A] -) B Hyp <-- ! (unify A B) (th* X A Hyp);
   (mode [input+ A Stream] -) B Hyp <-- (bind C (demodulate A)) (unify B C) (th* Stream [stream in] Hyp);
-  (mode [read+ : A Stream] -) B Hyp <-- (bind C (demodulate A)) (unify B C) (th* Stream [stream in] Hyp);
   (mode [set Var Val] -) A Hyp <-- ! (th* Var symbol Hyp) ! (th* [value Var] A Hyp) (th* Val A Hyp);
   (mode [<-sem F] -) C Hyp <-- ! 
                                (th* F [A ==> B] Hyp)
@@ -180,7 +179,7 @@
   
 \* Pauses for user *\
 (define pause-for-user
-   -> (let Byte (read-byte (stinput)) 
+   -> (let Byte (do (read-byte (stinput)) (read-byte (stinput)))
              (if (= Byte 94) 
                  (error "input aborted~%") 
                  (nl)))) 
@@ -212,7 +211,7 @@
   (mode [define F | X] -) A Hyp <-- (t*-defh (compile (function <sig+rules>) X) F A Hyp);)
 
 (defprolog t*-defh
-  (mode [Sig | Rules] -) F A Hyp <-- (t*-defhh Sig (ue Sig) F A Hyp Rules);)
+  (mode [Sig | Rules] -) F A Hyp <-- (t*-defhh Sig (ue-sig Sig) F A Hyp Rules);)
 
 (defprolog t*-defhh 
   Sig Sig&& F A Hyp Rules <-- (t*-rules Rules Sig&& 1 F [[F : Sig&&] | Hyp])
@@ -228,6 +227,11 @@
   [P X] -> [P X]	where (= P protect)
   [X | Y] -> (map (function ue) [X | Y])  
   X -> (concat && X)        where (variable? X)
+  X -> X)
+
+(define ue-sig
+  [X | Y] -> (map (function ue-sig) [X | Y])  
+  X -> (concat &&& X)        where (variable? X)
   X -> X)
 
 (define ues
