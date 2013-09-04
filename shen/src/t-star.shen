@@ -64,6 +64,7 @@
 (define curry
   [F | X] -> [F | (map (function curry) X)]   where (special? F)
   [Def F | X] -> [Def F | X] where (extraspecial? Def)
+  [type X A] -> [type (curry X) A]
   [F X Y | Z] -> (curry [[F X] Y | Z])
   [F X] -> [(curry F) (curry X)]
   X -> X)  
@@ -116,7 +117,7 @@
                                            (bind X&& (placeholder)) 
                                            (bind Z (ebr X&& X Y))
                                            (th* Z B [[X&& : A] | Hyp]); 
-  (mode [let X Y Z] -) A Hyp <-- ! (th* Y B Hyp) 
+  (mode [let X Y Z] -) A Hyp <--    (th* Y B Hyp) 
                                     (bind X&& (placeholder))
                                     (bind W (ebr X&& X Z))
                                     (th* W A [[X&& : B] | Hyp]);
