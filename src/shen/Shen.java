@@ -92,8 +92,13 @@ public class Shen {
         asList(Math.class, System.class).forEach(Primitives::KL_import);
     }
 
-    interface LLPredicate { boolean test(long a, long b); }
-    interface Invokable { MethodHandle invoker() throws Exception; }
+    interface LLPredicate {
+        boolean test(long a, long b);
+    }
+
+    interface Invokable {
+        MethodHandle invoker() throws Exception;
+    }
 
     public static class Numbers implements Opcodes {
         static final long tag = 1, real = 0, integer = 1;
@@ -393,16 +398,16 @@ public class Shen {
                     if (!cons.isList()) return cons;
                     return cons.car;
                 } finally {
-                    cons =!cons.isList() || EMPTY_LIST.equals(cons.cdr) ? null : (Cons) cons.cdr;
+                    cons = !cons.isList() || EMPTY_LIST.equals(cons.cdr) ? null : (Cons) cons.cdr;
                 }
             }
-         }
+        }
     }
 
     public static final class Primitives {
         public static boolean EQ(Object left, Object right) {
             if (Objects.equals(left, right)) return true;
-            if (absvectorP(left) && absvectorP(right))  {
+            if (absvectorP(left) && absvectorP(right)) {
                 Object[] leftA = (Object[]) left;
                 Object[] rightA = (Object[]) right;
                 if (leftA.length != rightA.length) return false;
@@ -441,10 +446,11 @@ public class Shen {
         }
 
         public static Object simple_error(String s) {
-            throw new RuntimeException(s, null, false, false) {};
+            throw new RuntimeException(s, null, false, false) {
+            };
         }
 
-       public static String error_to_string(Throwable e) {
+        public static String error_to_string(Throwable e) {
             return e.getMessage() == null ? e.toString() : e.getMessage();
         }
 
@@ -538,8 +544,10 @@ public class Shen {
             }
 
             switch (direction.symbol) {
-                case "in": return new BufferedInputStream(new FileInputStream(file));
-                case "out": return new BufferedOutputStream(new FileOutputStream(file));
+                case "in":
+                    return new BufferedInputStream(new FileInputStream(file));
+                case "out":
+                    return new BufferedOutputStream(new FileOutputStream(file));
             }
             throw new IllegalArgumentException("invalid direction");
         }
@@ -550,10 +558,13 @@ public class Shen {
         }
 
         static long startTime = System.currentTimeMillis();
+
         public static long get_time(Symbol time) {
             switch (time.symbol) {
-                case "run": return real((currentTimeMillis() - startTime) / 1000.0);
-                case "unix": return integer(currentTimeMillis() / 1000);
+                case "run":
+                    return real((currentTimeMillis() - startTime) / 1000.0);
+                case "unix":
+                    return integer(currentTimeMillis() / 1000);
             }
             throw new IllegalArgumentException("get-time does not understand the parameter " + time);
         }
@@ -620,7 +631,7 @@ public class Shen {
         }
 
         public static Object[] ATp(Object x, Object y) {
-            return new Object[] {shen_tuple, x, y};
+            return new Object[]{shen_tuple, x, y};
         }
 
         public static long hash(Object s, long limit) {
@@ -653,9 +664,9 @@ public class Shen {
         for (String file : asList("toplevel", "core", "sys", "sequent", "yacc", "reader",
                 "prolog", "track", "load", "writer", "macros", "declarations", "types", "t-star"))
             load("klambda/" + file, Callable.class).newInstance().call();
-	//Loading custom klambda files
+        //Loading custom klambda files
         for (String file : asList("types"))
-	    load("klambda-custom/" + file, Callable.class).newInstance().call();
+            load("klambda-custom/" + file, Callable.class).newInstance().call();
         set("shen-*installing-kl*", false);
         set("*home-directory*", getProperty("user.dir")); //Resetting it because it gets overwritten in declarations.kl
         builtins.addAll(vec(symbols.values().stream().filter(s -> !s.fn.isEmpty())));
@@ -696,7 +707,8 @@ public class Shen {
             //noinspection RedundantCast
             File compilePath = new File((String) intern("*compile-path*").value());
             File classFile = new File(compilePath, file + ".class");
-            if (!(compilePath.mkdirs() || compilePath.isDirectory())) throw new IOException("could not make directory: " + compilePath);
+            if (!(compilePath.mkdirs() || compilePath.isDirectory()))
+                throw new IOException("could not make directory: " + compilePath);
             try {
                 return compiler.load(classFile.getName().replaceAll(".class$", ".kl"), aClass);
             } finally {
@@ -716,7 +728,7 @@ public class Shen {
     static String version() {
         String version = null;
         try (InputStream manifest = getSystemClassLoader().getResourceAsStream("META-INF/MANIFEST.MF")) {
-                version = new Manifest(manifest).getMainAttributes().getValue(IMPLEMENTATION_VERSION);
+            version = new Manifest(manifest).getMainAttributes().getValue(IMPLEMENTATION_VERSION);
         } catch (IOException ignored) {
         }
         return version != null ? version : "<unknown>";
@@ -803,7 +815,7 @@ public class Shen {
                     return java.invokeWithArguments(args);
                 }
                 throw new NoSuchMethodException("undefined function " + name + type
-                        + (symbol.fn.isEmpty() ?  "" : " in " + vec(symbol.fn.stream().map(MethodHandle::type))));
+                        + (symbol.fn.isEmpty() ? "" : " in " + vec(symbol.fn.stream().map(MethodHandle::type))));
             }
 
             int arity = symbol.fn.get(0).type().parameterCount();
@@ -818,7 +830,7 @@ public class Shen {
             debug("match based on argument types: %s", match);
 
             MethodHandle fallback = linker(site, toBytecodeName(name)).asType(type);
-            if (symbol.fn.size() >  1 && !match.type().parameterList().stream().allMatch(isEqual(long.class))) {
+            if (symbol.fn.size() > 1 && !match.type().parameterList().stream().allMatch(isEqual(long.class))) {
                 match = guards.computeIfAbsent(asList(type, symbol.fn), key -> guard(type, symbol.fn));
                 debug("selected: %s", match);
             }
@@ -828,9 +840,10 @@ public class Shen {
                 site.setTarget(symbol.fnGuard.guardWithTest(match.asType(type), fallback));
             }
             Object result = match.invokeWithArguments(args);
-            try{
+            try {
                 maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
-            }catch(Exception e){ }
+            } catch (Exception e) {
+            }
             return result;
         }
 
@@ -859,6 +872,7 @@ public class Shen {
         }
 
         static final Map<Object, Class> types = new HashMap<>();
+
         static {
             types.put(intern("symbol"), Symbol.class);
             types.put(intern("number"), long.class);
@@ -922,7 +936,7 @@ public class Shen {
                 MethodHandle target = candidates.get(i - 1);
                 Class<?> differentType = find(target.type().parameterList(), fallback.type().parameterList(), (x, y) -> !x.equals(y));
                 int firstDifferent = target.type().parameterList().indexOf(differentType);
-                if(firstDifferent == -1){
+                if (firstDifferent == -1) {
                     firstDifferent = 0;
                 }
                 debug("switching on %d argument type %s", firstDifferent, differentType);
@@ -943,9 +957,9 @@ public class Shen {
         }
 
         public static boolean checkClass(Class<?> xClass, Object x) {
-            if(xClass != null){
+            if (xClass != null) {
                 return canCastStrict(x.getClass(), xClass);
-            }else{
+            } else {
                 return false;
             }
         }
@@ -975,7 +989,8 @@ public class Shen {
                 int arity = sam.getParameterTypes().length;
                 int actual = target.type().parameterCount();
                 if (arity < actual) target = insertArguments(target, arity, new Object[actual - arity]);
-                if (arity > actual) target = dropArguments(target, actual, asList(sam.getParameterTypes()).subList(actual, arity));
+                if (arity > actual)
+                    target = dropArguments(target, actual, asList(sam.getParameterTypes()).subList(actual, arity));
                 return asInterfaceInstance(sam.getDeclaringClass(), target);
             }
             return null;
@@ -987,10 +1002,10 @@ public class Shen {
                 if (isSAM(method.type().parameterType(i)))
                     filters[i] = proxy.bindTo(findSAM(method.type().parameterType(i)))
                             .asType(methodType(method.type().parameterType(i), Object.class));
-                else  if (canCast(method.type().parameterType(i), int.class))
+                else if (canCast(method.type().parameterType(i), int.class))
                     filters[i] = asInt.asType(methodType(method.type().parameterType(i), Object.class));
-                else  if (canCast(method.type().wrap().parameterType(i), Number.class))
-                        filters[i] = asNumber.asType(methodType(method.type().parameterType(i), Object.class));
+                else if (canCast(method.type().wrap().parameterType(i), Number.class))
+                    filters[i] = asNumber.asType(methodType(method.type().parameterType(i), Object.class));
             if (canCast(method.type().wrap().returnType(), Number.class))
                 method = filterReturnValue(method, number.asType(methodType(long.class, method.type().returnType())));
             return filterArguments(method, 0, filters);
@@ -1081,7 +1096,7 @@ public class Shen {
         }
 
         static boolean canCast(Class<?> a, Class<?> b) {
-            return a == Object.class  || b == Object.class || canCastStrict(a, b);
+            return a == Object.class || b == Object.class || canCastStrict(a, b);
         }
 
         static boolean canCastStrict(Class<?> a, Class<?> b) {
@@ -1106,7 +1121,7 @@ public class Shen {
                 name.fn.add(fn);
                 if (guard != null) {
                     name.fnGuard = new SwitchPoint();
-                    invalidateAll(new SwitchPoint[] {guard});
+                    invalidateAll(new SwitchPoint[]{guard});
                 }
                 return name;
             }
@@ -1141,7 +1156,7 @@ public class Shen {
         }
 
         static String unscramble(String s) {
-            return toSourceName(s).replaceAll("_", "-").replaceAll("^KL-", "") .replaceAll("GT", ">").replaceAll("EQ", "=")
+            return toSourceName(s).replaceAll("_", "-").replaceAll("^KL-", "").replaceAll("GT", ">").replaceAll("EQ", "=")
                     .replaceAll("LT", "<").replaceAll("EX$", "!").replaceAll("P$", "?").replaceAll("^AT", "@");
         }
 
@@ -1172,6 +1187,7 @@ public class Shen {
                 symbolBSM = handle(mh(RT.class, "symbolBSM")), or = handle(RT.mh(Primitives.class, "or")),
                 and = handle(RT.mh(Primitives.class, "and"));
         static final Map<Class, MethodHandle> push = new HashMap<>();
+
         static {
             register(Macros.class, Compiler::macro);
         }
@@ -1217,8 +1233,9 @@ public class Shen {
         }
 
         static ClassWriter classWriter(String name, Class<?> anInterface) {
-            ClassWriter cw = new ClassWriter(COMPUTE_FRAMES) {}; // Needs to be in this package for some reason.
-            cw.visit(V1_7, ACC_PUBLIC | ACC_FINAL, name, null, getInternalName(Object.class), new String[] {getInternalName(anInterface)});
+            ClassWriter cw = new ClassWriter(COMPUTE_FRAMES) {
+            }; // Needs to be in this package for some reason.
+            cw.visit(V1_7, ACC_PUBLIC | ACC_FINAL, name, null, getInternalName(Object.class), new String[]{getInternalName(anInterface)});
             return cw;
         }
 
@@ -1352,7 +1369,7 @@ public class Shen {
         }
 
         void recur(List<Type> argumentTypes) {
-            for (int i = args.size()- 1; i >= 0; i--) {
+            for (int i = args.size() - 1; i >= 0; i--) {
                 if (!isPrimitive(method.getArgumentTypes()[i])) mv.valueOf(argumentTypes.get(i));
                 mv.storeArg(i);
             }
@@ -1479,7 +1496,7 @@ public class Shen {
                 locals.put(x, let);
                 compile(z, returnType, tail);
                 if (hidden != null) locals.put(x, hidden);
-                else  locals.remove(x);
+                else locals.remove(x);
                 mv.push((String) null);
                 mv.storeLocal(let);
                 mv.visitLocalVariable(x.symbol, mv.getLocalType(let).getDescriptor(), null, start, mv.mark(), let);
@@ -1527,11 +1544,14 @@ public class Shen {
                 List<Object> list = new ArrayList<>((Collection<?>) kl);
                 if (!list.isEmpty())
                     switch (list.get(0).toString()) {
-                        case "let": return concat(closesOver(scope, list.get(2)), closesOver(conj(scope, list.get(2)), list.get(3)));
-                        case "lambda": return closesOver(conj(scope, list.get(2)), list.get(2));
-                        case "defun": return closesOver(into(scope, (Collection) list.get(2)), list.get(3));
+                        case "let":
+                            return concat(closesOver(scope, list.get(2)), closesOver(conj(scope, list.get(2)), list.get(3)));
+                        case "lambda":
+                            return closesOver(conj(scope, list.get(2)), list.get(2));
+                        case "defun":
+                            return closesOver(into(scope, (Collection) list.get(2)), list.get(3));
                     }
-                    return list.stream().flatMap(o -> closesOver(scope, o));
+                return list.stream().flatMap(o -> closesOver(scope, o));
             }
             return empty();
         }
@@ -1545,8 +1565,7 @@ public class Shen {
             if (asList("true", "false").contains(s.symbol)) {
                 push(Boolean.class, Boolean.valueOf(s.symbol));
                 return;
-            }
-            else if (locals.containsKey(s)) mv.loadLocal(locals.get(s));
+            } else if (locals.containsKey(s)) mv.loadLocal(locals.get(s));
             else if (args.contains(s)) mv.loadArg(args.indexOf(s));
             else push(s);
             topOfStack = typeOf(s);
@@ -1600,7 +1619,8 @@ public class Shen {
         }
 
         void popStack() {
-            if (topOfStack.getSize() == 1) mv.pop(); else mv.pop2();
+            if (topOfStack.getSize() == 1) mv.pop();
+            else mv.pop2();
         }
 
         void maybeCast(Class<?> type) {
@@ -1662,7 +1682,7 @@ public class Shen {
         }
 
         void bindTo() {
-            mv.invokeStatic(getType(RT.class), method("bindTo",desc(MethodHandle.class, MethodHandle.class, Object.class)));
+            mv.invokeStatic(getType(RT.class), method("bindTo", desc(MethodHandle.class, MethodHandle.class, Object.class)));
             topOfStack(MethodHandle.class);
         }
 
@@ -1680,7 +1700,7 @@ public class Shen {
             PrintWriter pw = new PrintWriter(err);
             TraceClassVisitor printer = new TraceClassVisitor(null, asm, pw);
             if (method == null)
-               new ClassReader(bytes).accept(printer, SKIP_DEBUG);
+                new ClassReader(bytes).accept(printer, SKIP_DEBUG);
             else {
                 ClassNode cn = new ClassNode();
                 new ClassReader(bytes).accept(cn, SKIP_DEBUG);
@@ -1743,11 +1763,11 @@ public class Shen {
         //return zip(c1.stream(), c2.stream(), pred::test).allMatch(isEqual(true));
         Iterator<T> it1 = c1.iterator();
         Iterator<T> it2 = c2.iterator();
-        List<Boolean> result= new ArrayList<Boolean>();
-        while(it1.hasNext() && it2.hasNext()) {
+        List<Boolean> result = new ArrayList<Boolean>();
+        while (it1.hasNext() && it2.hasNext()) {
             T value1 = it1.next();
             T value2 = it2.next();
-            result.add(pred.test(value1,value2));
+            result.add(pred.test(value1, value2));
         }
         boolean ret = !result.contains(false);
         return ret;
@@ -1758,14 +1778,14 @@ public class Shen {
         //        .filter(Objects::nonNull).findFirst().orElse(null);
         Iterator<T> it1 = c1.iterator();
         Iterator<T> it2 = c2.iterator();
-        Collection<T> result =  new ArrayList<T>(c1);
+        Collection<T> result = new ArrayList<T>(c1);
         result.clear();
-        while(it1.hasNext() && it2.hasNext()) {
+        while (it1.hasNext() && it2.hasNext()) {
             T value1 = it1.next();
             T value2 = it2.next();
-            if(pred.test(value1, value2) == true){
+            if (pred.test(value1, value2) == true) {
                 result.add(value1);
-            }else{
+            } else {
                 result.add(null);
             }
         }
@@ -1790,6 +1810,7 @@ public class Shen {
     //*****************************************************************
     //*****************************************************************
     //Stuff taken out of b93 and modified appropriately
+
     /**
      * Creates a lazy concatenated {@code Stream} whose elements are all the
      * elements of a first {@code Stream} succeeded by all the elements of the
@@ -1798,9 +1819,9 @@ public class Shen {
      * streams is parallel.
      *
      * @param <T> The type of stream elements
-     * @param a the first stream
-     * @param b the second stream to concatenate on to end of the first
-     *        stream
+     * @param a   the first stream
+     * @param b   the second stream to concatenate on to end of the first
+     *            stream
      * @return the concatenation of the two input streams
      */
     public static <T> Stream<T> concat(Stream<? extends T> a, Stream<? extends T> b) {
@@ -1814,8 +1835,8 @@ public class Shen {
                 ? StreamSupport.parallelStream(split)
                 : StreamSupport.stream(split);*/
         return (a.isParallel() || b.isParallel())
-                ? StreamSupport.stream(split,true)
-                : StreamSupport.stream(split,false);
+                ? StreamSupport.stream(split, true)
+                : StreamSupport.stream(split, false);
     }
 
     private abstract static class ConcatSpliterator<T, T_SPLITR extends Spliterator<T>>
@@ -1847,8 +1868,7 @@ public class Shen {
                     beforeSplit = false;
                     hasNext = bSpliterator.tryAdvance(consumer);
                 }
-            }
-            else
+            } else
                 hasNext = bSpliterator.tryAdvance(consumer);
             return hasNext;
         }
@@ -1867,8 +1887,7 @@ public class Shen {
                 // will either be Long.MAX_VALUE or overflow to a negative value
                 long size = aSpliterator.estimateSize() + bSpliterator.estimateSize();
                 return (size >= 0) ? size : Long.MAX_VALUE;
-            }
-            else {
+            } else {
                 return bSpliterator.estimateSize();
             }
         }
@@ -1879,8 +1898,7 @@ public class Shen {
                 // Concatenation loses DISTINCT and SORTED characteristics
                 return aSpliterator.characteristics() & bSpliterator.characteristics() &
                         ~(Spliterator.DISTINCT | Spliterator.SORTED);
-            }
-            else {
+            } else {
                 return bSpliterator.characteristics();
             }
         }
@@ -1914,8 +1932,7 @@ public class Shen {
                         beforeSplit = false;
                         hasNext = bSpliterator.tryAdvance(action);
                     }
-                }
-                else
+                } else
                     hasNext = bSpliterator.tryAdvance(action);
                 return hasNext;
             }
