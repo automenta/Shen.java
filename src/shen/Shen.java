@@ -1182,10 +1182,14 @@ public class Shen {
         static final AnonymousClassLoader loader = AnonymousClassLoader.make(unsafe(), RT.class);
         static final Map<Symbol, MethodHandle> macros = new HashMap<>();
         static final List<Class<?>> literals = asList(Long.class, String.class, Boolean.class, Handle.class);
+
         static final Handle
-                applyBSM = handle(mh(RT.class, "applyBSM")), invokeBSM = handle(mh(RT.class, "invokeBSM")),
-                symbolBSM = handle(mh(RT.class, "symbolBSM")), or = handle(RT.mh(Primitives.class, "or")),
-                and = handle(RT.mh(Primitives.class, "and"));
+                applyBSM = handle(RT.class, "shen/Shen$RT", "applyBSM"),
+                invokeBSM = handle(RT.class, "shen/Shen$RT", "invokeBSM"),
+                symbolBSM = handle(RT.class, "shen/Shen$RT", "symbolBSM"),
+                or = handle(Primitives.class, "shen/Shen$Primitives", "or"),
+                and = handle(Primitives.class, "shen/Shen$Primitives", "and");
+
         static final Map<Class, MethodHandle> push = new HashMap<>();
 
         static {
@@ -1252,9 +1256,9 @@ public class Shen {
             return getMethodDescriptor(returnType, argumentTypes.toArray(new Type[argumentTypes.size()]));
         }
 
-        static Handle handle(MethodHandle handle) {
-            MethodHandleInfo info = new MethodHandleInfo(handle);
-            return handle(getInternalName(info.getDeclaringClass()), info.getName(), handle.type().toMethodDescriptorString());
+        static Handle handle(Class<?> aClass, String shenClassName, String shenRTFunc) {
+            MethodHandle hand = mh(aClass, shenRTFunc);
+            return handle(shenClassName, shenRTFunc, hand.type().toMethodDescriptorString());
         }
 
         static Handle handle(String className, String name, String desc) {
@@ -1804,6 +1808,7 @@ public class Shen {
     static <T extends Throwable> T uncheckAndThrow(Throwable t) throws T { //noinspection unchecked
         throw (T) t;
     }
+
     //*****************************************************************
     //*****************************************************************
     //*****************************************************************
@@ -1969,4 +1974,11 @@ public class Shen {
             }
         }
     }
+
+    //*****************************************************************
+    //*****************************************************************
+    //*****************************************************************
+    //*****************************************************************
+    //*****************************************************************
+
 }
