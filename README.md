@@ -79,7 +79,7 @@ In **buildAndRunWindows.bat** :
 * Set **MAVEN_HOME**
 
 Then first run of **buildAndRunWindows.bat** performs build.
-Subsequent runs runs repl.
+Subsequent invocations runs the repl.
 
 
 ### The Shen Test Suite
