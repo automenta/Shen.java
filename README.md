@@ -32,7 +32,7 @@ JDK 8 Early Access Release can be downloaded at the following locations :
 
 ### To run the REPL:
 
-In Linux : 
+#### In Linux : 
 
     export JAVA_HOME=/path/to/jdk1.8.0/with/lambdas
     ./shen.java
@@ -71,7 +71,15 @@ In Linux :
                  (/. X (integer? (/ X 3))))
     [0 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60... etc]
 
-In Windows first run of **buildAndRunWindows.bat performs build. Subsequent invocations run repl.
+#### In Windows :
+
+In **buildAndRunWindows.bat** :
+
+* Set **JAVA_HOME**
+* Set **MAVEN_HOME**
+
+Then first run of **buildAndRunWindows.bat** performs build.
+Subsequent runs runs repl.
 
 
 ### The Shen Test Suite
