@@ -26,7 +26,7 @@ Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59
 
 This is pretty experimental, and this entire project acts as a playground for various JDK 8 and JVM language stuff. There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html) and [JDK 8](https://jdk8.java.net/download.html) (b117 - there are often small but  breaking changes). It's based on this [Maven project](https://github.com/hraberg/Shen.java/blob/master/pom.xml).
 
-JDK 8 with lamdba can be downloaded at the following locations : 
+JDK 8 Early Access Release can be downloaded at the following locations : 
 * [Latest JDK 8](https://jdk8.java.net/download.html)
 * [Older releases of JDK 8](https://jdk8.java.net/archive/index.html)
 
