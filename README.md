@@ -1,4 +1,4 @@
-# 神.java | Shen for Java
+# 神.java | Shen for Java (Shen 14)
 
 http://shenlanguage.org/
 
