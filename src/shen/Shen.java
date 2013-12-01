@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -23,11 +24,12 @@ import java.util.jar.Manifest;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.lang.Character.isUpperCase;
 import static java.lang.ClassLoader.getSystemClassLoader;
-import static java.lang.Double.*;
+import static java.lang.ClassLoader.getSystemResources;
+import static java.lang.Double.doubleToLongBits;
+import static java.lang.Double.longBitsToDouble;
 import static java.lang.Math.floorMod;
 import static java.lang.Math.toIntExact;
 import static java.lang.String.format;
@@ -41,14 +43,13 @@ import static java.lang.invoke.SwitchPoint.invalidateAll;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.Arrays.*;
 import static java.util.Arrays.fill;
-import static java.util.Arrays.stream;
 import static java.util.Collections.*;
 import static java.util.Objects.deepEquals;
-import static java.util.function.Predicate.*;
+import static java.util.function.Predicate.isEqual;
 import static java.util.jar.Attributes.Name.IMPLEMENTATION_VERSION;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-//import static java.util.stream.Streams.*;
 import static jdk.internal.org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static jdk.internal.org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static jdk.internal.org.objectweb.asm.Type.*;
@@ -58,6 +59,8 @@ import static shen.Shen.Cons.toCons;
 import static shen.Shen.KLReader.lines;
 import static shen.Shen.KLReader.read;
 import static shen.Shen.Numbers.*;
+import static shen.Shen.Numbers.asNumber;
+import static shen.Shen.Primitives.EQ;
 import static shen.Shen.Primitives.*;
 import static shen.Shen.RT.*;
 import static shen.Shen.RT.lookup;
@@ -77,7 +80,7 @@ public class Shen {
     static {
         set("*language*", "Java");
         set("*implementation*", format("%s (build %s)", getProperty("java.runtime.name"), getProperty("java.runtime.version")));
-        set("*porters*", "Håkan Råberg");
+        set("*porters*", new String("Håkan Råberg".getBytes(), Charset.forName("ISO-8859-1")));
         set("*port*", version());
         set("*stinput*", in);
         set("*stoutput*", out);
@@ -92,13 +95,8 @@ public class Shen {
         asList(Math.class, System.class).forEach(Primitives::KL_import);
     }
 
-    interface LLPredicate {
-        boolean test(long a, long b);
-    }
-
-    interface Invokable {
-        MethodHandle invoker() throws Exception;
-    }
+    interface LLPredicate { boolean test(long a, long b); }
+    interface Invokable { MethodHandle invoker() throws Exception; }
 
     public static class Numbers implements Opcodes {
         static final long tag = 1, real = 0, integer = 1;
@@ -398,16 +396,16 @@ public class Shen {
                     if (!cons.isList()) return cons;
                     return cons.car;
                 } finally {
-                    cons = !cons.isList() || EMPTY_LIST.equals(cons.cdr) ? null : (Cons) cons.cdr;
+                    cons =!cons.isList() || EMPTY_LIST.equals(cons.cdr) ? null : (Cons) cons.cdr;
                 }
             }
-        }
+         }
     }
 
     public static final class Primitives {
         public static boolean EQ(Object left, Object right) {
             if (Objects.equals(left, right)) return true;
-            if (absvectorP(left) && absvectorP(right)) {
+            if (absvectorP(left) && absvectorP(right))  {
                 Object[] leftA = (Object[]) left;
                 Object[] rightA = (Object[]) right;
                 if (leftA.length != rightA.length) return false;
@@ -446,11 +444,10 @@ public class Shen {
         }
 
         public static Object simple_error(String s) {
-            throw new RuntimeException(s, null, false, false) {
-            };
+            throw new RuntimeException(s, null, false, false) {};
         }
 
-        public static String error_to_string(Throwable e) {
+       public static String error_to_string(Throwable e) {
             return e.getMessage() == null ? e.toString() : e.getMessage();
         }
 
@@ -526,8 +523,7 @@ public class Shen {
         }
 
         public static Long convertToLong(Object x) {
-            if (x instanceof Long) x = asNumber((Long) x);
-            return Long.valueOf((Long) x);
+            return (Long) asNumber((Long) x);
         }
 
         public static <T> T write_byte(T x, OutputStream s) throws IOException {
@@ -544,10 +540,8 @@ public class Shen {
             }
 
             switch (direction.symbol) {
-                case "in":
-                    return new BufferedInputStream(new FileInputStream(file));
-                case "out":
-                    return new BufferedOutputStream(new FileOutputStream(file));
+                case "in": return new BufferedInputStream(new FileInputStream(file));
+                case "out": return new BufferedOutputStream(new FileOutputStream(file));
             }
             throw new IllegalArgumentException("invalid direction");
         }
@@ -558,13 +552,10 @@ public class Shen {
         }
 
         static long startTime = System.currentTimeMillis();
-
         public static long get_time(Symbol time) {
             switch (time.symbol) {
-                case "run":
-                    return real((currentTimeMillis() - startTime) / 1000.0);
-                case "unix":
-                    return integer(currentTimeMillis() / 1000);
+                case "run": return real((currentTimeMillis() - startTime) / 1000.0);
+                case "unix": return integer(currentTimeMillis() / 1000);
             }
             throw new IllegalArgumentException("get-time does not understand the parameter " + time);
         }
@@ -631,7 +622,7 @@ public class Shen {
         }
 
         public static Object[] ATp(Object x, Object y) {
-            return new Object[]{shen_tuple, x, y};
+            return new Object[] {shen_tuple, x, y};
         }
 
         public static long hash(Object s, long limit) {
@@ -664,9 +655,8 @@ public class Shen {
         for (String file : asList("toplevel", "core", "sys", "sequent", "yacc", "reader",
                 "prolog", "track", "load", "writer", "macros", "declarations", "types", "t-star"))
             load("klambda/" + file, Callable.class).newInstance().call();
-        //Loading custom klambda files
         for (String file : asList("types"))
-            load("klambda-custom/" + file, Callable.class).newInstance().call();
+	        load("klambda-custom/" + file, Callable.class).newInstance().call();
         set("shen-*installing-kl*", false);
         set("*home-directory*", getProperty("user.dir")); //Resetting it because it gets overwritten in declarations.kl
         builtins.addAll(vec(symbols.values().stream().filter(s -> !s.fn.isEmpty())));
@@ -707,8 +697,7 @@ public class Shen {
             //noinspection RedundantCast
             File compilePath = new File((String) intern("*compile-path*").value());
             File classFile = new File(compilePath, file + ".class");
-            if (!(compilePath.mkdirs() || compilePath.isDirectory()))
-                throw new IOException("could not make directory: " + compilePath);
+            if (!(compilePath.mkdirs() || compilePath.isDirectory())) throw new IOException("could not make directory: " + compilePath);
             try {
                 return compiler.load(classFile.getName().replaceAll(".class$", ".kl"), aClass);
             } finally {
@@ -726,12 +715,12 @@ public class Shen {
     }
 
     static String version() {
-        String version = null;
-        try (InputStream manifest = getSystemClassLoader().getResourceAsStream("META-INF/MANIFEST.MF")) {
-            version = new Manifest(manifest).getMainAttributes().getValue(IMPLEMENTATION_VERSION);
-        } catch (IOException ignored) {
+        try (InputStream manifest = find(Collections.list(getSystemResources("META-INF/MANIFEST.MF")).stream(),
+                                            u -> u.getPath().matches(".*shen.java.*?.jar!.*")).openStream()) {
+                return new Manifest(manifest).getMainAttributes().getValue(IMPLEMENTATION_VERSION);
+        } catch (IOException | NullPointerException ignored) {
         }
-        return version != null ? version : "<unknown>";
+        return "<unknown>";
     }
 
     public static class KLReader {
@@ -815,7 +804,7 @@ public class Shen {
                     return java.invokeWithArguments(args);
                 }
                 throw new NoSuchMethodException("undefined function " + name + type
-                        + (symbol.fn.isEmpty() ? "" : " in " + vec(symbol.fn.stream().map(MethodHandle::type))));
+                        + (symbol.fn.isEmpty() ?  "" : " in " + vec(symbol.fn.stream().map(MethodHandle::type))));
             }
 
             int arity = symbol.fn.get(0).type().parameterCount();
@@ -830,7 +819,7 @@ public class Shen {
             debug("match based on argument types: %s", match);
 
             MethodHandle fallback = linker(site, toBytecodeName(name)).asType(type);
-            if (symbol.fn.size() > 1 && !match.type().parameterList().stream().allMatch(isEqual(long.class))) {
+            if (symbol.fn.size() >  1 && !match.type().parameterList().stream().allMatch(isEqual(long.class))) {
                 match = guards.computeIfAbsent(asList(type, symbol.fn), key -> guard(type, symbol.fn));
                 debug("selected: %s", match);
             }
@@ -840,10 +829,7 @@ public class Shen {
                 site.setTarget(symbol.fnGuard.guardWithTest(match.asType(type), fallback));
             }
             Object result = match.invokeWithArguments(args);
-            try {
-                maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
-            } catch (Exception e) {
-            }
+            maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
             return result;
         }
 
@@ -872,7 +858,6 @@ public class Shen {
         }
 
         static final Map<Object, Class> types = new HashMap<>();
-
         static {
             types.put(intern("symbol"), Symbol.class);
             types.put(intern("number"), long.class);
@@ -936,9 +921,7 @@ public class Shen {
                 MethodHandle target = candidates.get(i - 1);
                 Class<?> differentType = find(target.type().parameterList(), fallback.type().parameterList(), (x, y) -> !x.equals(y));
                 int firstDifferent = target.type().parameterList().indexOf(differentType);
-                if (firstDifferent == -1) {
-                    firstDifferent = 0;
-                }
+                if (firstDifferent == -1) firstDifferent = 0;
                 debug("switching on %d argument type %s", firstDifferent, differentType);
                 debug("target: %s ; fallback: %s", target, fallback);
                 MethodHandle test = checkClass.bindTo(differentType);
@@ -957,11 +940,7 @@ public class Shen {
         }
 
         public static boolean checkClass(Class<?> xClass, Object x) {
-            if (xClass != null) {
-                return canCastStrict(x.getClass(), xClass);
-            } else {
-                return false;
-            }
+            return xClass != null && canCastStrict(x.getClass(), xClass);
         }
 
         static MethodHandle relinkOn(Class<? extends Throwable> exception, MethodHandle fn, MethodHandle fallback) {
@@ -989,8 +968,7 @@ public class Shen {
                 int arity = sam.getParameterTypes().length;
                 int actual = target.type().parameterCount();
                 if (arity < actual) target = insertArguments(target, arity, new Object[actual - arity]);
-                if (arity > actual)
-                    target = dropArguments(target, actual, asList(sam.getParameterTypes()).subList(actual, arity));
+                if (arity > actual) target = dropArguments(target, actual, asList(sam.getParameterTypes()).subList(actual, arity));
                 return asInterfaceInstance(sam.getDeclaringClass(), target);
             }
             return null;
@@ -1002,10 +980,10 @@ public class Shen {
                 if (isSAM(method.type().parameterType(i)))
                     filters[i] = proxy.bindTo(findSAM(method.type().parameterType(i)))
                             .asType(methodType(method.type().parameterType(i), Object.class));
-                else if (canCast(method.type().parameterType(i), int.class))
+                else  if (canCast(method.type().parameterType(i), int.class))
                     filters[i] = asInt.asType(methodType(method.type().parameterType(i), Object.class));
-                else if (canCast(method.type().wrap().parameterType(i), Number.class))
-                    filters[i] = asNumber.asType(methodType(method.type().parameterType(i), Object.class));
+                else  if (canCast(method.type().wrap().parameterType(i), Number.class))
+                        filters[i] = asNumber.asType(methodType(method.type().parameterType(i), Object.class));
             if (canCast(method.type().wrap().returnType(), Number.class))
                 method = filterReturnValue(method, number.asType(methodType(long.class, method.type().returnType())));
             return filterArguments(method, 0, filters);
@@ -1096,7 +1074,7 @@ public class Shen {
         }
 
         static boolean canCast(Class<?> a, Class<?> b) {
-            return a == Object.class || b == Object.class || canCastStrict(a, b);
+            return a == Object.class  || b == Object.class || canCastStrict(a, b);
         }
 
         static boolean canCastStrict(Class<?> a, Class<?> b) {
@@ -1121,7 +1099,7 @@ public class Shen {
                 name.fn.add(fn);
                 if (guard != null) {
                     name.fnGuard = new SwitchPoint();
-                    invalidateAll(new SwitchPoint[]{guard});
+                    invalidateAll(new SwitchPoint[] {guard});
                 }
                 return name;
             }
@@ -1156,7 +1134,7 @@ public class Shen {
         }
 
         static String unscramble(String s) {
-            return toSourceName(s).replaceAll("_", "-").replaceAll("^KL-", "").replaceAll("GT", ">").replaceAll("EQ", "=")
+            return toSourceName(s).replaceAll("_", "-").replaceAll("^KL-", "") .replaceAll("GT", ">").replaceAll("EQ", "=")
                     .replaceAll("LT", "<").replaceAll("EX$", "!").replaceAll("P$", "?").replaceAll("^AT", "@");
         }
 
@@ -1182,16 +1160,11 @@ public class Shen {
         static final AnonymousClassLoader loader = AnonymousClassLoader.make(unsafe(), RT.class);
         static final Map<Symbol, MethodHandle> macros = new HashMap<>();
         static final List<Class<?>> literals = asList(Long.class, String.class, Boolean.class, Handle.class);
-
         static final Handle
-                applyBSM = handle(RT.class, "shen/Shen$RT", "applyBSM"),
-                invokeBSM = handle(RT.class, "shen/Shen$RT", "invokeBSM"),
-                symbolBSM = handle(RT.class, "shen/Shen$RT", "symbolBSM"),
-                or = handle(Primitives.class, "shen/Shen$Primitives", "or"),
-                and = handle(Primitives.class, "shen/Shen$Primitives", "and");
-
+                applyBSM = handle(RT.class, "applyBSM"), invokeBSM = handle(RT.class, "invokeBSM"),
+                symbolBSM = handle(RT.class, "symbolBSM"), or = handle(Primitives.class, "or"),
+                and = handle(Primitives.class, "and");
         static final Map<Class, MethodHandle> push = new HashMap<>();
-
         static {
             register(Macros.class, Compiler::macro);
         }
@@ -1237,9 +1210,8 @@ public class Shen {
         }
 
         static ClassWriter classWriter(String name, Class<?> anInterface) {
-            ClassWriter cw = new ClassWriter(COMPUTE_FRAMES) {
-            }; // Needs to be in this package for some reason.
-            cw.visit(V1_7, ACC_PUBLIC | ACC_FINAL, name, null, getInternalName(Object.class), new String[]{getInternalName(anInterface)});
+            ClassWriter cw = new ClassWriter(COMPUTE_FRAMES) {}; // Needs to be in this package for some reason.
+            cw.visit(V1_7, ACC_PUBLIC | ACC_FINAL, name, null, getInternalName(Object.class), new String[] {getInternalName(anInterface)});
             return cw;
         }
 
@@ -1256,9 +1228,8 @@ public class Shen {
             return getMethodDescriptor(returnType, argumentTypes.toArray(new Type[argumentTypes.size()]));
         }
 
-        static Handle handle(Class<?> aClass, String shenClassName, String shenRTFunc) {
-            MethodHandle hand = mh(aClass, shenRTFunc);
-            return handle(shenClassName, shenRTFunc, hand.type().toMethodDescriptorString());
+        static Handle handle(Class<?> declaringClass, String name) {
+            return handle(getInternalName(declaringClass), name, mh(declaringClass, name).type().toMethodDescriptorString());
         }
 
         static Handle handle(String className, String name, String desc) {
@@ -1373,7 +1344,7 @@ public class Shen {
         }
 
         void recur(List<Type> argumentTypes) {
-            for (int i = args.size() - 1; i >= 0; i--) {
+            for (int i = args.size()- 1; i >= 0; i--) {
                 if (!isPrimitive(method.getArgumentTypes()[i])) mv.valueOf(argumentTypes.get(i));
                 mv.storeArg(i);
             }
@@ -1500,9 +1471,11 @@ public class Shen {
                 locals.put(x, let);
                 compile(z, returnType, tail);
                 if (hidden != null) locals.put(x, hidden);
-                else locals.remove(x);
-                mv.push((String) null);
-                mv.storeLocal(let);
+                else  locals.remove(x);
+                if (!tail) {
+                    mv.push((String) null);
+                    mv.storeLocal(let);
+                }
                 mv.visitLocalVariable(x.symbol, mv.getLocalType(let).getDescriptor(), null, start, mv.mark(), let);
             }
 
@@ -1548,14 +1521,11 @@ public class Shen {
                 List<Object> list = new ArrayList<>((Collection<?>) kl);
                 if (!list.isEmpty())
                     switch (list.get(0).toString()) {
-                        case "let":
-                            return concat(closesOver(scope, list.get(2)), closesOver(conj(scope, list.get(2)), list.get(3)));
-                        case "lambda":
-                            return closesOver(conj(scope, list.get(2)), list.get(2));
-                        case "defun":
-                            return closesOver(into(scope, (Collection) list.get(2)), list.get(3));
+                        case "let": return concat(closesOver(scope, list.get(2)), closesOver(conj(scope, list.get(2)), list.get(3)));
+                        case "lambda": return closesOver(conj(scope, list.get(2)), list.get(2));
+                        case "defun": return closesOver(into(scope, (Collection) list.get(2)), list.get(3));
                     }
-                return list.stream().flatMap(o -> closesOver(scope, o));
+                    return list.stream().flatMap(o -> closesOver(scope, o));
             }
             return empty();
         }
@@ -1569,7 +1539,8 @@ public class Shen {
             if (asList("true", "false").contains(s.symbol)) {
                 push(Boolean.class, Boolean.valueOf(s.symbol));
                 return;
-            } else if (locals.containsKey(s)) mv.loadLocal(locals.get(s));
+            }
+            else if (locals.containsKey(s)) mv.loadLocal(locals.get(s));
             else if (args.contains(s)) mv.loadArg(args.indexOf(s));
             else push(s);
             topOfStack = typeOf(s);
@@ -1623,8 +1594,7 @@ public class Shen {
         }
 
         void popStack() {
-            if (topOfStack.getSize() == 1) mv.pop();
-            else mv.pop2();
+            if (topOfStack.getSize() == 1) mv.pop(); else mv.pop2();
         }
 
         void maybeCast(Class<?> type) {
@@ -1686,7 +1656,7 @@ public class Shen {
         }
 
         void bindTo() {
-            mv.invokeStatic(getType(RT.class), method("bindTo", desc(MethodHandle.class, MethodHandle.class, Object.class)));
+            mv.invokeStatic(getType(RT.class), method("bindTo",desc(MethodHandle.class, MethodHandle.class, Object.class)));
             topOfStack(MethodHandle.class);
         }
 
@@ -1704,7 +1674,7 @@ public class Shen {
             PrintWriter pw = new PrintWriter(err);
             TraceClassVisitor printer = new TraceClassVisitor(null, asm, pw);
             if (method == null)
-                new ClassReader(bytes).accept(printer, SKIP_DEBUG);
+               new ClassReader(bytes).accept(printer, SKIP_DEBUG);
             else {
                 ClassNode cn = new ClassNode();
                 new ClassReader(bytes).accept(cn, SKIP_DEBUG);
@@ -1763,38 +1733,22 @@ public class Shen {
         return into(singletonList(x), seq);
     }
 
-    static <T> boolean every(Collection<T> c1, Collection<T> c2, BiPredicate<T, T> pred) {
-        //return zip(c1.stream(), c2.stream(), pred::test).allMatch(isEqual(true));
+    static <T, R> Stream<R> map(Stream<T> c1, Stream<T> c2, BiFunction<T, T, R> f) {
         Iterator<T> it1 = c1.iterator();
         Iterator<T> it2 = c2.iterator();
-        List<Boolean> result = new ArrayList<Boolean>();
+        List<R> result= new ArrayList<R>();
         while (it1.hasNext() && it2.hasNext()) {
-            T value1 = it1.next();
-            T value2 = it2.next();
-            result.add(pred.test(value1, value2));
+            result.add(f.apply(it1.next(), it2.next()));
         }
-        boolean ret = !result.contains(false);
-        return ret;
+        return result.stream();
+    }
+
+    static <T> boolean every(Collection<T> c1, Collection<T> c2, BiPredicate<T, T> pred) {
+        return map(c1.stream(), c2.stream(), pred::test).allMatch(isEqual(true));
     }
 
     static <T> T find(Collection<T> c1, Collection<T> c2, BiPredicate<T, T> pred) {
-        //return zip(c1.stream(), c2.stream(), (x, y) -> pred.test(x, y) ? x : null)
-        //        .filter(Objects::nonNull).findFirst().orElse(null);
-        Iterator<T> it1 = c1.iterator();
-        Iterator<T> it2 = c2.iterator();
-        Collection<T> result = new ArrayList<T>(c1);
-        result.clear();
-        while (it1.hasNext() && it2.hasNext()) {
-            T value1 = it1.next();
-            T value2 = it2.next();
-            if (pred.test(value1, value2) == true) {
-                result.add(value1);
-            } else {
-                result.add(null);
-            }
-        }
-
-        return result.stream().filter(Objects::nonNull).findFirst().orElse(null);
+        return find(map(c1.stream(), c2.stream(), (x, y) -> pred.test(x, y) ? x : null), Objects::nonNull);
     }
 
     static <T> List<T> rest(List<T> coll) {
@@ -1808,177 +1762,4 @@ public class Shen {
     static <T extends Throwable> T uncheckAndThrow(Throwable t) throws T { //noinspection unchecked
         throw (T) t;
     }
-
-    //*****************************************************************
-    //*****************************************************************
-    //*****************************************************************
-    //*****************************************************************
-    //*****************************************************************
-    //Stuff taken out of b93 and modified appropriately
-
-    /**
-     * Creates a lazy concatenated {@code Stream} whose elements are all the
-     * elements of a first {@code Stream} succeeded by all the elements of the
-     * second {@code Stream}. The resulting stream is ordered if both
-     * of the input streams are ordered, and parallel if either of the input
-     * streams is parallel.
-     *
-     * @param <T> The type of stream elements
-     * @param a   the first stream
-     * @param b   the second stream to concatenate on to end of the first
-     *            stream
-     * @return the concatenation of the two input streams
-     */
-    public static <T> Stream<T> concat(Stream<? extends T> a, Stream<? extends T> b) {
-        Objects.requireNonNull(a);
-        Objects.requireNonNull(b);
-
-        @SuppressWarnings("unchecked")
-        Spliterator<T> split = new ConcatSpliterator.OfRef<>((Spliterator<T>) a.spliterator(),
-                (Spliterator<T>) b.spliterator());
-        /*return (a.isParallel() || b.isParallel())
-                ? StreamSupport.parallelStream(split)
-                : StreamSupport.stream(split);*/
-        return (a.isParallel() || b.isParallel())
-                ? StreamSupport.stream(split, true)
-                : StreamSupport.stream(split, false);
-    }
-
-    private abstract static class ConcatSpliterator<T, T_SPLITR extends Spliterator<T>>
-            implements Spliterator<T> {
-        protected final T_SPLITR aSpliterator;
-        protected final T_SPLITR bSpliterator;
-        // True when no split has occurred, otherwise false
-        boolean beforeSplit;
-
-        public ConcatSpliterator(T_SPLITR aSpliterator, T_SPLITR bSpliterator) {
-            this.aSpliterator = aSpliterator;
-            this.bSpliterator = bSpliterator;
-            beforeSplit = true;
-        }
-
-        @Override
-        public T_SPLITR trySplit() {
-            T_SPLITR ret = beforeSplit ? aSpliterator : (T_SPLITR) bSpliterator.trySplit();
-            beforeSplit = false;
-            return ret;
-        }
-
-        @Override
-        public boolean tryAdvance(Consumer<? super T> consumer) {
-            boolean hasNext;
-            if (beforeSplit) {
-                hasNext = aSpliterator.tryAdvance(consumer);
-                if (!hasNext) {
-                    beforeSplit = false;
-                    hasNext = bSpliterator.tryAdvance(consumer);
-                }
-            } else
-                hasNext = bSpliterator.tryAdvance(consumer);
-            return hasNext;
-        }
-
-        @Override
-        public void forEachRemaining(Consumer<? super T> consumer) {
-            if (beforeSplit)
-                aSpliterator.forEachRemaining(consumer);
-            bSpliterator.forEachRemaining(consumer);
-        }
-
-        @Override
-        public long estimateSize() {
-            if (beforeSplit) {
-                // If one or both estimates are Long.MAX_VALUE then the sum
-                // will either be Long.MAX_VALUE or overflow to a negative value
-                long size = aSpliterator.estimateSize() + bSpliterator.estimateSize();
-                return (size >= 0) ? size : Long.MAX_VALUE;
-            } else {
-                return bSpliterator.estimateSize();
-            }
-        }
-
-        @Override
-        public int characteristics() {
-            if (beforeSplit) {
-                // Concatenation loses DISTINCT and SORTED characteristics
-                return aSpliterator.characteristics() & bSpliterator.characteristics() &
-                        ~(Spliterator.DISTINCT | Spliterator.SORTED);
-            } else {
-                return bSpliterator.characteristics();
-            }
-        }
-
-        @Override
-        public Comparator<? super T> getComparator() {
-            if (beforeSplit)
-                throw new IllegalStateException();
-            return bSpliterator.getComparator();
-        }
-
-        private static class OfRef<T> extends ConcatSpliterator<T, Spliterator<T>> {
-            private OfRef(Spliterator<T> aSpliterator, Spliterator<T> bSpliterator) {
-                super(aSpliterator, bSpliterator);
-            }
-        }
-
-        private static abstract class OfPrimitive<T, T_CONS, T_SPLITR extends Spliterator.OfPrimitive<T, T_CONS, T_SPLITR>>
-                extends ConcatSpliterator<T, T_SPLITR>
-                implements Spliterator.OfPrimitive<T, T_CONS, T_SPLITR> {
-            private OfPrimitive(T_SPLITR aSpliterator, T_SPLITR bSpliterator) {
-                super(aSpliterator, bSpliterator);
-            }
-
-            @Override
-            public boolean tryAdvance(T_CONS action) {
-                boolean hasNext;
-                if (beforeSplit) {
-                    hasNext = aSpliterator.tryAdvance(action);
-                    if (!hasNext) {
-                        beforeSplit = false;
-                        hasNext = bSpliterator.tryAdvance(action);
-                    }
-                } else
-                    hasNext = bSpliterator.tryAdvance(action);
-                return hasNext;
-            }
-
-            @Override
-            public void forEachRemaining(T_CONS action) {
-                if (beforeSplit)
-                    aSpliterator.forEachRemaining(action);
-                bSpliterator.forEachRemaining(action);
-            }
-        }
-
-        private static class OfInt
-                extends ConcatSpliterator.OfPrimitive<Integer, IntConsumer, Spliterator.OfInt>
-                implements Spliterator.OfInt {
-            private OfInt(Spliterator.OfInt aSpliterator, Spliterator.OfInt bSpliterator) {
-                super(aSpliterator, bSpliterator);
-            }
-        }
-
-        private static class OfLong
-                extends ConcatSpliterator.OfPrimitive<Long, LongConsumer, Spliterator.OfLong>
-                implements Spliterator.OfLong {
-            private OfLong(Spliterator.OfLong aSpliterator, Spliterator.OfLong bSpliterator) {
-                super(aSpliterator, bSpliterator);
-            }
-        }
-
-        private static class OfDouble
-                extends ConcatSpliterator.OfPrimitive<Double, DoubleConsumer, Spliterator.OfDouble>
-                implements Spliterator.OfDouble {
-            private OfDouble(Spliterator.OfDouble aSpliterator, Spliterator.OfDouble bSpliterator) {
-                super(aSpliterator, bSpliterator);
-            }
-        }
-    }
-
-    //*****************************************************************
-    //*****************************************************************
-    //*****************************************************************
-    //*****************************************************************
-    //*****************************************************************
-
 }
