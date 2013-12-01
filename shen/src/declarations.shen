@@ -85,7 +85,7 @@
 (set *infs* 0)
 (set *hush* false)
 (set *optimise* false)
-(set *version* "13.2.1")
+(set *version* "version 14")
 
 (define initialise_arity_table
   [] -> []

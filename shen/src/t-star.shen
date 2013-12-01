@@ -180,7 +180,7 @@
   
 \* Pauses for user *\
 (define pause-for-user
-   -> (let Byte (do (read-byte (stinput)) (read-byte (stinput)))
+   -> (let Byte (read-byte (stinput))
              (if (= Byte 94) 
                  (error "input aborted~%") 
                  (nl)))) 

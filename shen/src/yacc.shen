@@ -55,15 +55,13 @@
 (package shen. []
 
 (define yacc
-  [defcc S { A ==> B } | CC_Stuff] -> (yacc [defcc S | CC_Stuff]) 
   [defcc S | CC_Stuff] -> (yacc->shen S CC_Stuff))
 
 (define yacc->shen
   S CC_Stuff -> (let CCRules (split_cc_rules CC_Stuff [])
                      CCBody (map (function cc_body) CCRules)
                      YaccCases (yacc_cases CCBody)
-                     CatchKill (catchkill YaccCases)
-                     [define S (protect Stream) -> CatchKill]))
+                     [define S (protect Stream) -> YaccCases]))
                      
 (define split_cc_rules
   [] [] -> []
@@ -85,6 +83,7 @@
    
 (define default_semantics 
   [] -> []
+  [S] -> S						  where (grammar_symbol? S)
   [S | Syntax] -> [append S (default_semantics Syntax)]	  where (grammar_symbol? S)
   [S | Syntax] -> [cons S (default_semantics Syntax)]) 
   
@@ -114,33 +113,32 @@
               (variable? S) (variable-match [S | Syntax] Stream Semantics)
               (jump_stream? S) (jump_stream [S | Syntax] Stream Semantics)
               (terminal? S) (check_stream [S | Syntax] Stream Semantics)              
-              (list_stream? S) (list_stream (decons S) Syntax Stream Semantics)
-	            true (error "~A is not legal syntax~%" S)))       
+              (cons? S) (list-stream (decons S) Syntax Stream Semantics)
+	      true (error "~A is not legal syntax~%" S)))       
 
-(define list_stream?
-  [_ | _] -> true
-  _ -> false)
-
-(define decons
-  [cons X Y] -> [X | (decons Y)]
-  X -> X)
-
-(define list_stream
+(define list-stream
   S Syntax Stream Semantics 
    -> (let Test [and [cons? [hd Stream]] [cons? [hd [hd Stream]]]]
-           Action [snd-or-fail (syntax S 
-                          [pair [hd [hd Stream]] [hdtl Stream]]
-                          [leave! (syntax Syntax 
-                              [pair [tl [hd Stream]]
-                                          [hdtl Stream]]
-                              Semantics)])] 
-          Else [fail]
-          [if Test Action Else])) 
-          
-(define snd-or-fail
-  [_ Y] -> Y
-  _ -> (fail))          
-   
+           Placeholder (gensym place)
+           RunOn (syntax Syntax [pair [tl [hd Stream]] [hd [tl Stream]]] Semantics)
+           Action (insert-runon RunOn Placeholder 
+                    (syntax S 
+                            [pair [hd [hd Stream]] [hd [tl Stream]]] 
+                            Placeholder)) 
+           [if Test
+               Action
+               [fail]]))
+               
+(define decons
+  [cons X []] -> [X]
+  [cons X Y] -> [X | (decons Y)]
+  X -> X)               
+
+(define insert-runon
+  Runon Placeholder [pair _ Placeholder] -> Runon
+  Runon Placeholder [X | Y] -> (map (/. Z (insert-runon Runon Placeholder Z)) [X | Y])
+  _ _ X -> X)
+
 (define strip-pathname
   Cs -> Cs 		where (not (element? "." Cs))
   [_ | Cs] -> (strip-pathname Cs))				
@@ -190,12 +188,16 @@
           [if Test Action Else]))
   
 (define semantics
-  [leave! S] -> S
   [] -> []
   S -> [hdtl (concat (protect Parse_) S)] 	where (grammar_symbol? S) 
   S -> (concat (protect Parse_) S) 	where (variable? S)
+  [function S] -> [function S]
   [X | Y] -> (map (function semantics) [X | Y])
-  X -> X)       
+  X -> X) 
+
+(define snd-or-fail
+  [_ Y] -> Y
+  _ -> (fail))        
 
 (define fail
   -> fail!) 
@@ -212,17 +214,6 @@
 
 (define <e>
   [X _] -> [X []])
-  
-(define catchkill
-  Code -> [trap-error Code [lambda (protect E) [analyse-kill (protect E)]]])
-  
-(define analyse-kill
-  Exception -> (let String (error-to-string Exception)
-                    (if (= String "Shen YACC kill")
-                        (fail)
-                        (simple-error String))))
-                        
-(define kill
-  -> (simple-error "Shen YACC kill"))                            
+                      
 
 )

@@ -78,7 +78,7 @@
   [S V | M] -> (do (set S V) (multiple-set M)))
                  
 (define destroy
-  F -> (declare F []))
+  F -> (declare F symbol))
 
 (set *history* [])
 

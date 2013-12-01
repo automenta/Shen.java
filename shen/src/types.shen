@@ -110,7 +110,7 @@
 (declare cn [string --> [string --> string]])
 (declare compile [[[list A] ==> B] --> [[list A] --> [[[list A] --> B] --> B]]])
 (declare cons? [A --> boolean])
-(declare destroy [[A --> B] --> [A --> B]])
+(declare destroy [[A --> B] --> symbol])
 (declare difference [[list A] --> [[list A] --> [list A]]]) 
 (declare do [A --> [B --> B]])
 (declare <e> [[list A] ==> [list B]])

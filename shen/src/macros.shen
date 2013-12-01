@@ -99,16 +99,27 @@
   X -> X)
 
 (define prolog-macro
-  [prolog? | X] -> [intprolog (prolog-form X)]
+  [prolog? | Literals] -> (let F (gensym f)
+                               Receive (receive-terms Literals)
+                               PrologDef (eval (append [defprolog F] Receive [<--] (pass-literals Literals) [;]))
+                               Query [F | (append Receive [[start-new-prolog-process] [freeze true]])]
+                               Query)
   X -> X)
+
+(define receive-terms
+  [] -> []
+  [[receive X] | Terms] -> [X | (receive-terms Terms)]
+  [_ | Terms] -> (receive-terms Terms))
+
+(define pass-literals
+  [] -> []
+  [[receive _] | Literals] -> (pass-literals Literals)
+  [Literal | Literals] -> [Literal | (pass-literals Literals)])
 
 (define defprolog-macro
   [defprolog F | X] -> (compile (function <defprolog>) [F | X] (/. Y (prolog-error F Y)))
   X -> X)
 
-(define prolog-form
-  X -> (cons_form (map (function cons_form) X)))
-  
 (define datatype-macro
   [datatype F | Rules] 
    -> [process-datatype (intern-type F)
