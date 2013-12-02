@@ -17,9 +17,7 @@ See also: [shen.clj](https://github.com/hraberg/shen.clj)
 
 ## This Java Port
 
-**Shen.java is an [invokedynamic](http://www.slideshare.net/CharlesNutter/jax-2012-invoke-dynamic-keynote) based [K Lambda](http://www.shenlanguage.org/documentation/shendoc.htm) compiler.** I don't vouch for any of the implementation details regarding this - I'm learning as we go. All code lives in [`Shen.java`](https://github.com/hraberg/Shen.java/blob/master/src/shen/Shen.java). It passes the Shen test suite.
-
-The main [Shen JVM port](https://www.assembla.com/code/shen-on-java/git/nodes) is done by Joel Shellman and might be used for [Babel](http://www.shenlanguage.org/babel/babel.htm), Mark's IDE project.
+**Shen.java is an [invokedynamic](http://www.slideshare.net/CharlesNutter/jax-2012-invoke-dynamic-keynote) based [K Lambda](http://www.shenlanguage.org/documentation/shendoc.htm) compiler.** All code lives in [`Shen.java`](https://github.com/hraberg/Shen.java/blob/master/src/shen/Shen.java). It passes the Shen test suite.
 
 This port is loosely based on [`shen.clj`](https://github.com/hraberg/shen.clj), but has no dependency on Clojure.
 Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59435597e5761c72dbe9f0246fad0864/src/shen/Shen.java) using [MethodHandles](http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/MethodHandle.html) as a primitive. It's about 2x faster than `shen.clj`.
@@ -28,9 +26,7 @@ Core requirements :
 * [JDK 8 Early Access Release](https://jdk8.java.net/download.html). Tested with b117.
 * [Maven](http://maven.apache.org/). See [Maven project file](https://github.com/artella-coding/Shen.java/blob/master/pom.xml).
 
-Optional requirements :
-
-There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 
+Optional requirements : There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 
 
 
 ### To run the REPL:
