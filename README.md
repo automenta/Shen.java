@@ -24,11 +24,14 @@ The main [Shen JVM port](https://www.assembla.com/code/shen-on-java/git/nodes) i
 This port is loosely based on [`shen.clj`](https://github.com/hraberg/shen.clj), but has no dependency on Clojure.
 Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59435597e5761c72dbe9f0246fad0864/src/shen/Shen.java) using [MethodHandles](http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/MethodHandle.html) as a primitive. It's about 2x faster than `shen.clj`.
 
-This is pretty experimental, and this entire project acts as a playground for various JDK 8 and JVM language stuff. There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html) and [JDK 8 Early Access Release](https://jdk8.java.net/download.html) (b117 - there are often small but  breaking changes). It's based on this [Maven project](https://github.com/hraberg/Shen.java/blob/master/pom.xml).
+Core requirements : 
+* [JDK 8 Early Access Release](https://jdk8.java.net/download.html). Tested with b117.
+* [Maven](http://maven.apache.org/). See [Maven project file](https://github.com/artella-coding/Shen.java/blob/master/pom.xml).
 
-JDK 8 Early Access Release can be downloaded at the following locations : 
-* [Latest JDK 8](https://jdk8.java.net/download.html)
-* [Older releases of JDK 8](https://jdk8.java.net/archive/index.html)
+Optional requirements :
+
+There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 
+
 
 ### To run the REPL:
 
