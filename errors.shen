@@ -1,10 +1,6 @@
-(defprolog mem
-  X [X | _] <--;
-  X [Y | Z] <-- (mem X Z);)  
+\\To make errors disappear uncomment out the 
+\\line below
 
-\\This is the culprit
-(defprolog mem
-  X (mode [X | _] -) <--;
-  X (mode [_ | Y] -) <-- (mem X Y);)
+\\(load "errors_oldProlog.shen")
 
-(prolog? (mem 1 [X | 2]) (return X))
+(load "errors_illustrate.shen")
