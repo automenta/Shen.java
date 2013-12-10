@@ -5,6 +5,7 @@ java="$rlwrap $JAVA_HOME/bin/java $JAVA_OPTS"
 
 if [ "`which shen.java`" != "" ]; then
   DIR=$(dirname `which shen.java`)
+  echo "Using installation in "$DIR
 else
   DIR="."
 fi
