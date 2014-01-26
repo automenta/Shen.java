@@ -295,32 +295,23 @@
 
 (defprolog t*-defcc
  (mode [defcc F { [list A] ==> B } | Rest] -) C Hyp 
-    <-- (bind Sig (ue [[list A] ==> B]))
-        (bind ListA&& (hd Sig))
-        (bind B&& (hd (tl (tl Sig))))
-        (bind Rest& (plug-wildcards Rest))
-        (bind Rest&& (ue Rest&))
-        (get-rules Rules Rest&&)
-        !
-        (tc-rules F Rules ListA&& B&& [[F : Sig] | Hyp] 1)
-        (unify C [[list A] ==> B])
-        (bind Declare (declare F [[list A] ==> B]));)
+    <-- (t*-defcc-h [defcc F (ue (demodulate [[list A] ==> B])) 
+                    | (ue (split_cc_rules false (plug-wildcards Rest) []))] 
+                    C 
+                    Hyp);)
 
 (define plug-wildcards
   [X | Y] -> (map (function plug-wildcards) [X | Y])
   X -> (gensym (intern "X"))   where (= X _)
   X -> X)
-                                       
-(defprolog get-rules 
-  [] (mode [] -) <-- !;
-  [Rule | Rules] Rest <-- (first-rule Rest Rule Other) 
-                          !
-                          (get-rules Rules Other);)
-                          
-(defprolog first-rule
-  (mode [; | Other] -) [] Other <-- !;
-  (mode [X | Rest] -) [X | Rule] Other <-- (first-rule Rest Rule Other);)
-                                           
+          
+(defprolog t*-defcc-h 
+   (mode [defcc F [[list A] ==> B] | Rules] -) C Hyp        
+    <-- !
+        (tc-rules F Rules [list A] B [[F : [[list A] ==> B]] | Hyp] 1)
+        (unify C [[list A] ==> B])
+        (bind Declare (declare F [[list A] ==> B]));)
+                                 
 (defprolog tc-rules
   _ (mode [] -) _ _ _ _ <--;
   F (mode [Rule | Rules] -) (mode [list A] -) B Hyps N
@@ -334,14 +325,11 @@
   F _ _ _ _ N <-- (bind Err (error "type error in rule ~A of ~A" N F));)
 
 (defprolog check-defcc-rule 
-  Rule A B Hyps <--
-      (get-syntax+semantics Syntax Semantics Rule)
-      !
-      (syntax-hyps Syntax Hyps SynHyps A) 
-      !
-      (syntax-check Syntax A SynHyps)
-      !
-      (semantics-check Semantics B SynHyps);)
+  (mode [Syntax Semantics] -) A B Hyps <-- (syntax-hyps Syntax Hyps SynHyps A) 
+                                           !
+                                           (syntax-check Syntax A SynHyps)
+                                           !
+                                           (semantics-check Semantics B SynHyps);)
       
 (defprolog syntax-hyps
   (mode [] -) SynHyps SynHyps A <--;
@@ -350,13 +338,32 @@
                                                   (syntax-hyps Y Hyps SynHyps A);
   (mode [_ | Y] -) Hyps SynHyps A <-- (syntax-hyps Y Hyps SynHyps A);)  
                                      
-(defprolog get-syntax+semantics
-  [] S (mode [:= Semantics] -) <-- ! (bind S Semantics);
-  [] S (mode [:= Semantics where G] -) <-- ! (bind S [where G Semantics]);
-  [X | Syntax] Semantics (mode [X | Rule] -)
-   <-- (get-syntax+semantics Syntax Semantics Rule);)
-                                     
+                                  
 (defprolog syntax-check
+  (mode [] -) _ _ <--;
+  (mode [X | Syntax] -) A Hyps <-- (fwhen (grammar_symbol? X))
+                                   !
+                                   (t* [X : [[list A] ==> C]] Hyps)
+                                   !
+                                   (syntax-check Syntax A Hyps);
+  (mode [X | Syntax] -) A Hyps <-- (t* [X : A] Hyps)
+                                   !
+                                   (syntax-check Syntax A Hyps);)
+  
+(defprolog semantics-check
+  (mode [where P Q] -) B Hyps <-- ! 
+                                  (t* [(curry P) : boolean] Hyps)
+                                  (t* [(curry Q) : B] Hyps);
+  Semantics B Hyps <-- (is Semantics* (curry (rename-semantics Semantics)))
+                       (t* [Semantics* : B] Hyps);)
+                       
+(define rename-semantics
+  [X | Y] -> [(rename-semantics X) | (rename-semantics Y)]
+  X -> [<-sem X]  where (grammar_symbol? X)
+  X -> X)   
+  )  
+
+"(defprolog syntax-check
   (mode [] -) _ _ <--;
   (mode [X | Syntax] -) A Hyps <-- (fwhen (grammar_symbol? X))
                                    !
@@ -369,16 +376,4 @@
                                    (syntax-check Syntax A Hyps);
   (mode [X | Syntax] -) A Hyps <-- (t* [X : A] Hyps)
                                    !
-                                   (syntax-check Syntax A Hyps);)
-  
-(defprolog semantics-check
-  Semantics B Hyps <-- (is Semantics* (curry (rename-semantics Semantics)))
-                       (t* [Semantics* : B] Hyps);)
-                       
-(define rename-semantics
-  [X | Y] -> [(rename-semantics X) | (rename-semantics Y)]
-  X -> [<-sem X]  where (grammar_symbol? X)
-  X -> X)   
-  )
-         
-         
+                                   (syntax-check Syntax A Hyps);)"

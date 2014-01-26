@@ -55,31 +55,36 @@
 (package shen. []
 
 (define yacc
+  [defcc S { A ==> B } | CC_Stuff] -> (yacc [defcc S | CC_Stuff])
   [defcc S | CC_Stuff] -> (yacc->shen S CC_Stuff))
 
 (define yacc->shen
-  S CC_Stuff -> (let CCRules (split_cc_rules CC_Stuff [])
+  S CC_Stuff -> (let CCRules (split_cc_rules true CC_Stuff [])
                      CCBody (map (function cc_body) CCRules)
                      YaccCases (yacc_cases CCBody)
                      [define S (protect Stream) -> YaccCases]))
                      
 (define split_cc_rules
-  [] [] -> []
-  [] RevRule -> [(split_cc_rule (reverse RevRule) [])]
-  [; | CC_Stuff] RevRule 
-   -> [(split_cc_rule (reverse RevRule) []) | (split_cc_rules CC_Stuff [])]
-  [X | CC_Stuff] RevRule -> (split_cc_rules CC_Stuff [X | RevRule]))
+  _ [] [] -> []
+  Flag [] RevRule -> [(split_cc_rule Flag (reverse RevRule) [])]
+  Flag [; | CC_Stuff] RevRule 
+   -> [(split_cc_rule Flag (reverse RevRule) []) | (split_cc_rules Flag CC_Stuff [])]
+  Flag [X | CC_Stuff] RevRule -> (split_cc_rules Flag CC_Stuff [X | RevRule]))
   
 (define split_cc_rule 
-   [:= Semantics] RevSyntax -> [(reverse RevSyntax) Semantics]   	
-   [:= Semantics where Guard] RevSyntax 				
+   _ [:= Semantics] RevSyntax -> [(reverse RevSyntax) Semantics]   	
+   _ [:= Semantics where Guard] RevSyntax 				
     -> [(reverse RevSyntax) [where Guard Semantics]]
-   [] RevSyntax 
-   -> (do (output "warning: ")
-          (map (/. X (output "~A " X)) (reverse RevSyntax))
-          (output "has no semantics.~%")
-          (split_cc_rule [:= (default_semantics (reverse RevSyntax))] RevSyntax))
-   [Syntax | Rule] RevSyntax -> (split_cc_rule Rule [Syntax | RevSyntax])) 
+   Flag [] RevSyntax 
+   -> (do (semantic-completion-warning Flag RevSyntax)
+          (split_cc_rule Flag [:= (default_semantics (reverse RevSyntax))] RevSyntax))
+   Flag [Syntax | Rule] RevSyntax -> (split_cc_rule Flag Rule [Syntax | RevSyntax])) 
+
+(define semantic-completion-warning
+  true RevSyntax -> (do (output "warning: ")
+                        (map (/. X (output "~A " X)) (reverse RevSyntax))
+                        (output "has no semantics.~%"))
+  _ _ -> skip)
    
 (define default_semantics 
   [] -> []
@@ -191,7 +196,6 @@
   [] -> []
   S -> [hdtl (concat (protect Parse_) S)] 	where (grammar_symbol? S) 
   S -> (concat (protect Parse_) S) 	where (variable? S)
-  [function S] -> [function S]
   [X | Y] -> (map (function semantics) [X | Y])
   X -> X) 
 

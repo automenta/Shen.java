@@ -85,7 +85,7 @@
   [input] -> [input [stinput]]
   [read] -> [read [stinput]]
   [input+ Type] -> [input+ Type [stinput]]
-  [read+ Type] -> [read+ Type [stinput]]
+  [read-byte] -> [read-byte [stinput]]
   X -> X)
   
 (define compose
