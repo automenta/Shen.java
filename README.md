@@ -1,4 +1,4 @@
-# 神.java | Shen for Java (Shen 14)
+# 神.java | Shen for Java (Shen 14.2)
 
 http://shenlanguage.org/
 
@@ -23,7 +23,7 @@ This port is loosely based on [`shen.clj`](https://github.com/hraberg/shen.clj),
 Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59435597e5761c72dbe9f0246fad0864/src/shen/Shen.java) using [MethodHandles](http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/MethodHandle.html) as a primitive. It's about 2x faster than `shen.clj`.
 
 Core requirements : 
-* [JDK 8 Early Access Release](https://jdk8.java.net/download.html). Tested with b117.
+* [JDK 8 Early Access Release](https://jdk8.java.net/download.html). Tested with b124.
 * [Maven](http://maven.apache.org/). See [Maven project file](https://github.com/artella-coding/Shen.java/blob/master/pom.xml).
 
 Optional requirements : There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 
@@ -83,19 +83,19 @@ Subsequent invocations runs the repl.
 
 ### The Shen Test Suite
 
-Now passes. It is run at the end of the build:
+Passes all but one. It is run at the end of the build:
 
     ./build   # or ./tests if the jar already exists.
 
     [... loads of output ...]
-    passed ... 146
-    failed ...0
-    pass rate ...100.0%
+    passed ... 127
+    failed ...1
+    pass rate ...99.21875%
 
     ok
     0
 
-    run time: 9.882 secs
+    run time: 37.771 secs
 
 
 It's close to 2x faster than [`shen.clj`](https://github.com/hraberg/shen.clj).
