@@ -62,7 +62,20 @@
   S CC_Stuff -> (let CCRules (split_cc_rules true CC_Stuff [])
                      CCBody (map (function cc_body) CCRules)
                      YaccCases (yacc_cases CCBody)
-                     [define S (protect Stream) -> YaccCases]))
+                     [define S (protect Stream) -> (kill-code YaccCases)]))
+
+(define kill-code
+  YaccCases -> (protect [trap-error YaccCases [lambda E [analyse-kill E]]])   where (> (occurrences kill YaccCases) 0)
+  YaccCases -> YaccCases)
+
+(define kill
+  -> (simple-error "yacc kill"))
+
+(define analyse-kill
+  Exception -> (let String (error-to-string Exception)
+                    (if (= String "yacc kill")
+                        (fail)
+                        Exception))) 
                      
 (define split_cc_rules
   _ [] [] -> []

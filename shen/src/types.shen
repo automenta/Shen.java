@@ -70,18 +70,11 @@
               F)) 
 
 (define demodulate
-  X -> (fix (function demodh) X))
-  
-(define demodh
-  [X | Y] -> (map (function demodh) [X | Y])
-  X -> (demod-atom X))
-                 
-(define demod-atom
-  X -> (let Val (assoc X (value *synonyms*))
-           (if (empty? Val)
-               X
-               (tl Val))))
-  
+  X -> (trap-error (let Demod (walk (function demod) X)
+                       (if (= Demod X)
+                           X
+                           (demodulate Demod))) (/. E X)))  
+
 (define variancy-test 
   F A -> (let TypeF (typecheck F (protect B)) 
               Check (cases (= symbol TypeF) skip

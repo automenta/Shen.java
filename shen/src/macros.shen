@@ -155,8 +155,11 @@
   X -> X)
 
 (define synonyms-macro
-  [synonyms | X] -> [synonyms-help (rcons_form X)]
+  [synonyms | X] -> [synonyms-help (rcons_form (curry-synonyms X))]
   X -> X)
+
+(define curry-synonyms
+  Synonyms -> (map (function curry-type) Synonyms))
 
 (define nl-macro
   [nl] -> [nl 1]

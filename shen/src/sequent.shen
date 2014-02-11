@@ -259,12 +259,26 @@
   Types -> (include-h (difference (value *alldatatypes*) (map (function intern-type) Types))))
 
 (define synonyms-help
-  [] -> synonyms
-  [S1 S2 | S] -> (do (pushnew [S1 | (curry-type S2)] *synonyms*)
+  [] -> (demodulation-function (value *tc*) 
+                      (mapcan (function demod-rule) (value *synonyms*)))
+  [S1 S2 | S] -> (do (pushnew [S1 S2] *synonyms*)
                      (synonyms-help S))
-  _ -> (error "odd number of synonyms~%" []))
-  
+  _ -> (error "odd number of synonyms~%"))
+
 (define pushnew
    X Global -> (if (element? X (value Global))
-                    (value Global)
-                    (set Global [X | (value Global)])))           )           
+                   (value Global)
+                   (set Global [X | (value Global)])))
+                   
+(define demod-rule
+  [S1 S2] -> [(rcons_form S1) -> (rcons_form S2)])                               
+
+(define demodulation-function
+  TC? Rules -> (do (tc -) 
+                   (eval [define demod | (append Rules (default-rule))]) 
+                   (if TC? (tc +) skip) 
+                   synonyms))
+                
+(define default-rule
+  -> (protect [X -> X]))
+                  )           
