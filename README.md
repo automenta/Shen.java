@@ -70,12 +70,41 @@ Optional requirements : There's an IntelliJ project, which requires [IDEA 12](ht
                  (/. X (integer? (/ X 3))))
     [0 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60... etc]
 
-#### In Windows :
+#### In Windows XP :
 
-In **buildAndRunWindows.bat** :
+* Click "Download ZIP" button at https://github.com/artella-coding/Shen.java
+Alternatively : https://github.com/artella-coding/Shen.java/archive/master.zip
 
-* Set **JAVA_HOME**
-* Set **MAVEN_HOME**
+* Download Apache maven from http://maven.apache.org/download.cgi & extract
+
+Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
+
+* Download jdk8 from https://jdk8.java.net/download.html
+
+To extract in Windows XP :
+
+  * Right click on jdk-8-fcs-bin-b129-windows-i586-07_feb_2014.exe 
+
+  * Choose 7-Zip, then choose 'extract to "jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"'. Suppose extracted dictory is : 
+
+C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014
+
+  * Choose tools.zip, right click, choose 7-Zip, and "Extract Here".
+
+Then create a file run.bat with the contents at the top level of the jdk directory : 
+
+    @echo off
+
+    set "JAVA_HOME=C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"
+
+    FOR /R %%f IN (*.pack) DO "%JAVA_HOME%\bin\unpack200.exe" -r -v "%%f" "%%~pf%%~nf.jar"
+
+and run it.
+
+* In **buildAndRunWindows.bat** :
+
+  * Set **JAVA_HOME**
+  * Set **MAVEN_HOME**
 
 Then first run of **buildAndRunWindows.bat** performs build.
 Subsequent invocations runs the repl.
