@@ -102,8 +102,8 @@ Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
 
 * In **buildAndRunWindows.bat** :
 
-  * Set **JAVA_HOME**
-  * Set **MAVEN_HOME**
+  * Set **JAVA_HOME** appropriately (i.e. C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014 if performed as above).
+  * Set **MAVEN_HOME** appropriately (i.e. C:\Program Files\maven\apache-maven-2.2.1) if performed as above).
 
 Then first run of **buildAndRunWindows.bat** performs build.
 Subsequent invocations runs the repl.
