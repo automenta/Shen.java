@@ -92,11 +92,11 @@ Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
 
     Then create a file run.bat with the contents at the top level of the jdk directory : 
 
-      @echo off
+        @echo off
 
-      set "JAVA_HOME=C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"
+        set "JAVA_HOME=C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"
 
-      FOR /R %%f IN (*.pack) DO "%JAVA_HOME%\bin\unpack200.exe" -r -v "%%f" "%%~pf%%~nf.jar"
+        FOR /R %%f IN (*.pack) DO "%JAVA_HOME%\bin\unpack200.exe" -r -v "%%f" "%%~pf%%~nf.jar"
 
     and run it.
 
