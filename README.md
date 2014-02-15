@@ -86,19 +86,19 @@ Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
 
     * Choose 7-Zip, then choose 'extract to "jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"'. Suppose extracted dictory is : 
 
-  C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014
+    C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014
 
     * Choose tools.zip, right click, choose 7-Zip, and "Extract Here".
 
-  Then create a file run.bat with the contents at the top level of the jdk directory : 
+    Then create a file run.bat with the contents at the top level of the jdk directory : 
 
-    @echo off
+      @echo off
 
-    set "JAVA_HOME=C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"
+      set "JAVA_HOME=C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"
 
-    FOR /R %%f IN (*.pack) DO "%JAVA_HOME%\bin\unpack200.exe" -r -v "%%f" "%%~pf%%~nf.jar"
+      FOR /R %%f IN (*.pack) DO "%JAVA_HOME%\bin\unpack200.exe" -r -v "%%f" "%%~pf%%~nf.jar"
 
-and run it.
+    and run it.
 
 * In **buildAndRunWindows.bat** :
 
