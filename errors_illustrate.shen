@@ -6,12 +6,13 @@
 
 \*
 The mem function above works fine. However
-it is this mem function which, in conjunction with 
+it is the mem function below which, in conjunction with 
 the new form of the prolog-macro, and the
 "(return X)" which seems to cause the error.
 Tracking the mem function shows that it returns
 fine.
 *\
+
 (defprolog mem
   X (mode [X | _] -) <--;
   X (mode [_ | Y] -) <-- (mem X Y);)
@@ -29,8 +30,8 @@ fine.
          Case)))
 *\
 
+\\This line causes the problem
 (prolog? (mem 1 [X | 2]) (return X))
-
 
 \*
 
@@ -40,7 +41,7 @@ Note that the following works fine :
 
 Also if you track mem, then the line above works fine. 
 But as soon as you untrack, the error returns. To see
-this do ; 
+this do : 
 
 (track mem)
 
