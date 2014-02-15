@@ -30,3 +30,28 @@ fine.
 *\
 
 (prolog? (mem 1 [X | 2]) (return X))
+
+
+\*
+
+Note that the following works fine : 
+
+(prolog? (mem 1 [X | 2]) (return [X]))
+
+Also if you track mem, then the line above works fine. 
+But as soon as you untrack, the error returns. To see
+this do ; 
+
+(track mem)
+
+(prolog? (mem 1 [X | 2]) (return X))
+
+(untrack mem)
+
+(prolog? (mem 1 [X | 2]) (return X))
+
+See also the post at : 
+
+https://groups.google.com/d/msg/qilang/3DXJWo0hcRc/Q5iXoYaF-FsJ
+
+*\

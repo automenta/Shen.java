@@ -3,7 +3,7 @@ See following two posts :
 
 https://groups.google.com/d/msg/qilang/3DXJWo0hcRc/wNUU5OKdDMkJ
 
-http://shenlanguage.org/Download/Shen.zip … https://groups.google.com/d/msg/qilang/xc1zzltI3Dc/vC-tOuu-3CUJ
+https://groups.google.com/d/msg/qilang/9WxbCbxg8f4/dJsJtLmREkcJ
 
 Note that you can only track functions which are not made 
 external. For example if you add "bind" to the list below,
