@@ -1,6 +1,6 @@
 @echo off
 
-set "JAVA_HOME=C:\Program Files\lambda-8-b99-windows-i586-14_jul_2013\jdk1.8.0"
+set "JAVA_HOME=C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014"
 set "MAVEN_HOME=C:\Program Files\maven\apache-maven-2.2.1"
 
 IF NOT EXIST "%JAVA_HOME%" (

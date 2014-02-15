@@ -88,9 +88,9 @@ Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
 
     C:\Program Files\jdk-8-fcs-bin-b129-windows-i586-07_feb_2014
 
-    * Choose tools.zip, right click, choose 7-Zip, and "Extract Here".
+    * Then within extracted directory, choose tools.zip, right click, choose 7-Zip, and "Extract Here".
 
-    Then create a file run.bat with the contents at the top level of the jdk directory : 
+    Then create a file run.bat with the following contents at the top level of the jdk directory : 
 
         @echo off
 
