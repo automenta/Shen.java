@@ -40,4 +40,4 @@ Shen complains that it is not a legitimate function name
 *\
 )
 
-(map (function track) [deref lazyderef])
+(map (function track) [shen.deref shen.lazyderef])

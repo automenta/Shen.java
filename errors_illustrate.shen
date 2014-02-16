@@ -38,6 +38,13 @@ fine.
 Note that the following works fine : 
 
 (prolog? (mem 1 [X | 2]) (return [X]))
+(prolog? (return 2))
+(prolog? (mem 1 [X | 2]) (return "2"))
+(prolog? (mem 1 [X | 2]) (return Y))
+
+But the following does not : 
+
+(prolog? (mem 1 [X | 2]) (return 2))
 
 Also if you track mem, then the line above works fine. 
 But as soon as you untrack, the error returns. To see
