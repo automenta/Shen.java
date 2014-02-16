@@ -63,6 +63,8 @@ See also the post at :
 
 https://groups.google.com/d/msg/qilang/3DXJWo0hcRc/Q5iXoYaF-FsJ
 
+*****[EXTRA BRACKET PHENOMENON]*****
+
 Also found if you define mem as (notice extra brackets around
 "(mem X Y)"): 
 
@@ -70,6 +72,17 @@ Also found if you define mem as (notice extra brackets around
   X (mode [X | _] -) <--;
   X (mode [_ | Y] -) <-- ((mem X Y));)
 
-then the problem line of code works fine.
+(prolog? (mem 1 [X | 2]) (return X))
+
+then the problem line of code works fine. You can also 
+put the extra brackets upon the invocation of mem i.e 
+the following code works fine : 
+
+(defprolog mem
+  X (mode [X | _] -) <--;
+  X (mode [_ | Y] -) <-- (mem X Y);)
+
+\\Notice extra brackets below
+(prolog? ((mem 1 [X | 2])) (return X))
 
 *\
