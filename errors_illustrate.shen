@@ -63,7 +63,8 @@ See also the post at :
 
 https://groups.google.com/d/msg/qilang/3DXJWo0hcRc/Q5iXoYaF-FsJ
 
-Also found if you define mem as : 
+Also found if you define mem as (notice extra brackets around
+"(mem X Y)"): 
 
 (defprolog mem
   X (mode [X | _] -) <--;
