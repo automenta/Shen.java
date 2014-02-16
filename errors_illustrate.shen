@@ -63,4 +63,12 @@ See also the post at :
 
 https://groups.google.com/d/msg/qilang/3DXJWo0hcRc/Q5iXoYaF-FsJ
 
+Also found if you define mem as : 
+
+(defprolog mem
+  X (mode [X | _] -) <--;
+  X (mode [_ | Y] -) <-- ((mem X Y));)
+
+then the problem line of code works fine.
+
 *\
