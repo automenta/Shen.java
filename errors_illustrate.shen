@@ -41,6 +41,7 @@ Note that the following works fine :
 (prolog? (return 2))
 (prolog? (mem 1 [X | 2]) (return "2"))
 (prolog? (mem 1 [X | 2]) (return Y))
+(prolog? (mem "1" [X | 2]) (return X))
 
 But the following does not : 
 
