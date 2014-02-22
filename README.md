@@ -111,14 +111,14 @@ Subsequent invocations runs the repl.
 
 ### The Shen Test Suite
 
-Passes all but one. It is run at the end of the build:
+Passes all tests. It is run at the end of the build:
 
     ./build   # or ./tests if the jar already exists.
 
     [... loads of output ...]
-    passed ... 127
-    failed ...1
-    pass rate ...99.21875%
+    passed ... 128
+    failed ...0
+    pass rate ...100.0%
 
     ok
     0
