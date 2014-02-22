@@ -87,7 +87,7 @@ public class RT {
         Object result = match.invokeWithArguments(args);
         //maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
         try {
-            maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
+            //maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
         } catch (Exception e) {
         }
         return result;
