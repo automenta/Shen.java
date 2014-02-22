@@ -16,10 +16,6 @@ import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
-import static shen.Shen.*;
-import static shen.Shen.Numbers.*;
-import static shen.Shen.Primitives.intern;
-import static shen.Shen.RT.canCast;
 
 public class PrimitivesTest {
     @Test
@@ -27,7 +23,7 @@ public class PrimitivesTest {
         is(2L, "2");
         is(true, "true");
         is("foo", "\"foo\"");
-        is(intern("bar"), "bar");
+        is(Primitives.intern("bar"), "bar");
         is(false, "(= 2 3)");
         is(false, "(= \"foo\" \"bar\")");
         is(false, "(= true false)");
@@ -36,7 +32,7 @@ public class PrimitivesTest {
 
     @Test
     public void defun_lambda_and_let() {
-        is(intern("f"), "(defun f (x) (lambda y (+ x y))");
+        is(Primitives.intern("f"), "(defun f (x) (lambda y (+ x y))");
         is(5L, "((f 3) 2)");
         is(10L, "(let x 5 (* 2 x)");
     }
@@ -106,7 +102,7 @@ public class PrimitivesTest {
         is(1.5, "(let x 2.0 (let y 0.5  (- x y)))");
         is(1.5, "(let x 2 (let y 0.5  (- x y)))");
         is(true, "(= (value x) 1)");
-        is(intern("fun"), "(defun fun (x y) (- x y)))");
+        is(Primitives.intern("fun"), "(defun fun (x y) (- x y)))");
         is(1.5, "(fun 2 0.5)");
         is(1.5, "(fun 2.5 1)");
     }
@@ -223,13 +219,13 @@ public class PrimitivesTest {
 
     @Test
     public void absvector_absvector_p_address_gt_and_lt_address() {
-        Symbol fail = intern("fail!");
+        Symbol fail = Primitives.intern("fail!");
         Object[] absvector = {fail, fail, fail, fail, fail};
         is(absvector, "(set v (absvector 5)");
         is(false, "(absvector? v)");
         is(false, "(absvector? 2)");
         is(false, "(absvector? \"foo\")");
-        absvector[2] = integer(5L);
+        absvector[2] = Numbers.integer(5L);
         is(absvector, "(address-> (value v) 2 5)");
         is(5L, "(<-address (value v) 2)");
         is(-1L, "(trap-error (<-address (value v) 5) (lambda E -1))");
@@ -239,8 +235,8 @@ public class PrimitivesTest {
     public void eval_kl_freeze_and_thaw() {
         is(9L, "(eval-kl (cons + (cons 4 (cons 5 ()))))");
         is(4L, "(eval-kl 4)");
-        is(intern("hello"), "(eval-kl hello)");
-        is(intern("hello"), "(eval-kl hello)");
+        is(Primitives.intern("hello"), "(eval-kl hello)");
+        is(Primitives.intern("hello"), "(eval-kl hello)");
         is(MethodHandle.class, "(freeze (+ 2 2)");
         is(MethodHandle.class, "(freeze (/ 2 0))");
         is(4L, "((freeze (+ 2 2)))");
@@ -252,7 +248,7 @@ public class PrimitivesTest {
         is(5L, "(set x 5)");
         is(5L, "(value x)");
         is(5L, "(value (intern \"x\")");
-        is(intern("fun"), "(defun fun () (value x))");
+        is(Primitives.intern("fun"), "(defun fun () (value x))");
         is(5L, "(fun)");
         is(6L, "(set x 6)");
         is(6L, "(fun)");
@@ -270,7 +266,7 @@ public class PrimitivesTest {
         is(false, "(value x)");
         is(asList(), "(set x ())");
         is(asList(), "(value x)");
-        is(intern("fun"), "(defun fun (x) (value x))");
+        is(Primitives.intern("fun"), "(defun fun (x) (value x))");
         is(asList(), "(fun x)");
         is(5.0, "(set x 5.0)");
         is(5.0, "(fun x)");
@@ -344,8 +340,8 @@ public class PrimitivesTest {
         is(-1L, "(trap-error (hd 5) (lambda E -1))");
         is(-1L, "(trap-error (tl 5) (lambda E -1))");
         is(1L, "(hd (cons 1 (cons 2 (cons 3 ()))))");
-        is(asList(integer(2L), integer(3L)), "(tl (cons 1 (cons 2 (cons 3 ()))))");
-        is(new Cons(integer(5L), integer(10L)), "(cons 5 10)");
+        is(asList(Numbers.integer(2L), Numbers.integer(3L)), "(tl (cons 1 (cons 2 (cons 3 ()))))");
+        is(new Cons(Numbers.integer(5L), Numbers.integer(10L)), "(cons 5 10)");
     }
 
     @Test
@@ -380,10 +376,10 @@ public class PrimitivesTest {
         is(MethodHandle.class, "(cons 1)");
         is(MethodHandle.class, "(cons)");
         is(MethodHandle.class, "((cons) 1)");
-        is(asList(integer(1L)), "((cons 1) ())");
-        is(new Cons(integer(1L), integer(2L)), "((cons 1) 2)");
-        is(new Cons(integer(1L), integer(2L)), "(((cons) 1) 2)");
-        is(new Cons(integer(1L), integer(2L)), "((cons) 1 2)");
+        is(asList(Numbers.integer(1L)), "((cons 1) ())");
+        is(new Cons(Numbers.integer(1L), Numbers.integer(2L)), "((cons 1) 2)");
+        is(new Cons(Numbers.integer(1L), Numbers.integer(2L)), "(((cons) 1) 2)");
+        is(new Cons(Numbers.integer(1L), Numbers.integer(2L)), "((cons) 1 2)");
         is(true, "((> 50) 10)");
         is(true, "(let test or (test true false))");
         is(false, "(let test and (test true false))");
@@ -393,20 +389,20 @@ public class PrimitivesTest {
 
     @Test
     public void uncurry() {
-        is(asList(integer(1L), integer(2L)), "((lambda x (lambda y (cons x (cons y ())))) 1 2)");
-        is(new Cons(integer(1L), integer(2L)), "(((cons) 1) 2)");
+        is(asList(Numbers.integer(1L), Numbers.integer(2L)), "((lambda x (lambda y (cons x (cons y ())))) 1 2)");
+        is(new Cons(Numbers.integer(1L), Numbers.integer(2L)), "(((cons) 1) 2)");
     }
 
     @Test
     public void function() {
         is(3L, "((function +) 1 2)");
         is(3.0, "((function +) 1 2.0)");
-        is(intern("x"), "(defun x () y)");
-        is(intern("y"), "(let z x (z)))");
-        is(intern("x"), "(defun x (y) y)");
+        is(Primitives.intern("x"), "(defun x () y)");
+        is(Primitives.intern("y"), "(let z x (z)))");
+        is(Primitives.intern("x"), "(defun x (y) y)");
         is(2L, "(let a x (a 2)))");
-        is(intern("x"), "(defun x (y) (y))");
-        is(intern("y"), "(defun y () 1))");
+        is(Primitives.intern("x"), "(defun x (y) (y))");
+        is(Primitives.intern("y"), "(defun y () 1))");
         is(1L, "(x y)");
         is(MethodHandle.class, "(function undefined)");
         is(-1L, "(trap-error ((function undefined)) (lambda E -1))");
@@ -414,26 +410,26 @@ public class PrimitivesTest {
 
     @Test
     public void rebind() {
-        is(intern("fun"), "(defun fun (x) (cons 1 x)");
-        is(asList(integer(1L)), "(fun ())");
-        is(new Cons(integer(1L), integer(2L)), "(fun 2)");
-        is(intern("fun"), "(defun fun (x) (cons 1 x)");
-        is(new Cons(integer(1L), integer(2L)), "(fun 2)");
-        is(asList(integer(1L)), "(fun ())");
-        is(intern("fun2"), "(defun fun2 (x) (+ 2 x))");
+        is(Primitives.intern("fun"), "(defun fun (x) (cons 1 x)");
+        is(asList(Numbers.integer(1L)), "(fun ())");
+        is(new Cons(Numbers.integer(1L), Numbers.integer(2L)), "(fun 2)");
+        is(Primitives.intern("fun"), "(defun fun (x) (cons 1 x)");
+        is(new Cons(Numbers.integer(1L), Numbers.integer(2L)), "(fun 2)");
+        is(asList(Numbers.integer(1L)), "(fun ())");
+        is(Primitives.intern("fun2"), "(defun fun2 (x) (+ 2 x))");
         is(3L, "(fun2 1)");
         is(3.0, "(fun2 1.0)");
     }
 
     @Test
     public void recur() {
-        is(intern("factorial"), "(defun factorial (cnt acc) (if (= 0 cnt) acc (factorial (- cnt 1) (* acc cnt)))");
+        is(Primitives.intern("factorial"), "(defun factorial (cnt acc) (if (= 0 cnt) acc (factorial (- cnt 1) (* acc cnt)))");
         is(3628800L, "(factorial 10 1)");
     }
 
     @Test
     public void can_only_recur_from_tail_position() {
-        is(intern("fib"), "(defun fib (n) (if (<= n 1) n (+ (fib (- n 1)) (fib (- n 2)))))");
+        is(Primitives.intern("fib"), "(defun fib (n) (if (<= n 1) n (+ (fib (- n 1)) (fib (- n 2)))))");
         is(55L, "(fib 10)");
     }
 
@@ -449,16 +445,16 @@ public class PrimitivesTest {
         is("Oracle Corporation", "(System/getProperty \"java.vendor\")");
         is(1.414213562373095, "(Math/sqrt 2)"); // Should be 1.4142135623730951 <- last decimal is truncated
         is(Class.class, "(import java.util.Arrays)");
-        is(asList(integer(1L), integer(2L)), "(Arrays/asList 1 2)");
+        is(asList(Numbers.integer(1L), Numbers.integer(2L)), "(Arrays/asList 1 2)");
         is(Class.class, "(import java.util.ArrayList)");
         is(Class.class, "(value ArrayList)");
         is(0L, "(.size ()))");
         is(ArrayList.class, "(ArrayList.)");
-        is(asList(integer(1L)), "(ArrayList. (cons 1 ())");
+        is(asList(Numbers.integer(1L)), "(ArrayList. (cons 1 ())");
         is(Long.class, "(.size (ArrayList. (cons 1 ()))");
 //        is(asList(2L), "(tl (ArrayList. (cons 1 (cons 2 ())))");
         is("HELLO", "(.toUpperCase \"Hello\")");
-        is(intern("up"), "(defun up (x) (.toUpperCase x))");
+        is(Primitives.intern("up"), "(defun up (x) (.toUpperCase x))");
         is("UP", "(up \"up\")");
         is("TWICE", "(up \"twice\")");
     }
@@ -478,10 +474,10 @@ public class PrimitivesTest {
     public void relink_java() {
         is(Class.class, "(import java.util.ArrayList)");
         is(Class.class, "(import java.util.LinkedList)");
-        is(intern("to-string"), "(defun to-string (x) (.toString x))");
+        is(Primitives.intern("to-string"), "(defun to-string (x) (.toString x))");
         is(String.class, "(to-string (ArrayList. (cons 1 ()))");
         is(String.class, "(to-string (LinkedList. (cons 1 ()))");
-        is(intern("size"), "(defun size (x) (.size x))");
+        is(Primitives.intern("size"), "(defun size (x) (.size x))");
         is(1L, "(size (ArrayList. (cons 1 ()))");
         is(1L, "(size (LinkedList. (cons 1 ()))");
         is(0L, "(size ())");
@@ -491,46 +487,46 @@ public class PrimitivesTest {
 
     @Test
     public void redefine() {
-        is(intern("fun"), "(defun fun (x y) (+ x y))");
-        is(intern("fun2"), "(defun fun2 () (fun 1 2))");
+        is(Primitives.intern("fun"), "(defun fun (x y) (+ x y))");
+        is(Primitives.intern("fun2"), "(defun fun2 () (fun 1 2))");
         is(3L, "(fun 1 2)");
         is(3L, "(fun2)");
-        is(intern("fun"), "(defun fun (x y) (- x y))");
+        is(Primitives.intern("fun"), "(defun fun (x y) (- x y))");
         is(-1L, "(fun 1 2)");
         is(-1L, "(fun2)");
-        is(intern("fun"), "(defun fun (x y) (+ x y))");
+        is(Primitives.intern("fun"), "(defun fun (x y) (+ x y))");
         is(3L, "(fun 1 2)");
         is(3L, "(fun2)");
     }
 
     @Test
     public void casts() {
-        assertTrue(canCast(Long.class, Object.class));
-        assertTrue(canCast(Object.class, Long.class));
-        assertTrue(canCast(Long.class, Double.class));
-        assertFalse(canCast(Double.class, Long.class));
-        assertTrue(canCast(long.class, double.class));
-        assertFalse(canCast(double.class, long.class));
-        assertTrue(canCast(long.class, Double.class));
-        assertFalse(canCast(Double.class, Long.class));
-        assertTrue(canCast(long.class, Object.class));
-        assertTrue(canCast(Object.class, long.class));
-        assertTrue(canCast(Long.class, long.class));
-        assertTrue(canCast(long.class, Long.class));
-        assertTrue(canCast(long.class, long.class));
-        assertTrue(canCast(Object.class, Object.class));
-        assertTrue(canCast(String.class, Object.class));
-        assertTrue(canCast(Object.class, String.class));
-        assertFalse(canCast(Long.class, List.class));
+        assertTrue(RT.canCast(Long.class, Object.class));
+        assertTrue(RT.canCast(Object.class, Long.class));
+        assertTrue(RT.canCast(Long.class, Double.class));
+        assertFalse(RT.canCast(Double.class, Long.class));
+        assertTrue(RT.canCast(long.class, double.class));
+        assertFalse(RT.canCast(double.class, long.class));
+        assertTrue(RT.canCast(long.class, Double.class));
+        assertFalse(RT.canCast(Double.class, Long.class));
+        assertTrue(RT.canCast(long.class, Object.class));
+        assertTrue(RT.canCast(Object.class, long.class));
+        assertTrue(RT.canCast(Long.class, long.class));
+        assertTrue(RT.canCast(long.class, Long.class));
+        assertTrue(RT.canCast(long.class, long.class));
+        assertTrue(RT.canCast(Object.class, Object.class));
+        assertTrue(RT.canCast(String.class, Object.class));
+        assertTrue(RT.canCast(Object.class, String.class));
+        assertFalse(RT.canCast(Long.class, List.class));
     }
 
     void is(Object expected, String actual) {
         Object 神 = 神(actual);
         if (expected instanceof Class)
-            if (expected == Double.class) assertThat(isInteger((Long) 神), equalTo(false));
+            if (expected == Double.class) assertThat(Numbers.isInteger((Long) 神), equalTo(false));
             else assertThat(神, instanceOf((Class<?>) expected));
         else if (神 instanceof Long)
-            assertThat(asNumber((Long) 神), equalTo(expected));
+            assertThat(Numbers.asNumber((Long) 神), equalTo(expected));
         else if (神 instanceof Cons && expected instanceof List)
             assertThat(((Cons) 神).toList(), equalTo(expected));
         else
@@ -539,7 +535,7 @@ public class PrimitivesTest {
 
     Object 神(String shen) {
         try {
-            return eval(shen);
+            return Shen.eval(shen);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }

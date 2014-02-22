@@ -3,16 +3,13 @@ package shen;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static shen.Shen.eval;
-import static shen.Shen.install;
-
 public class TestProgramsTest {
     @Test @Ignore
     public void test_programs() throws Throwable {
-        install();
-        eval("(cd \"shen/Test Programs\")");
-        eval("(load \"README.shen\")");
-        eval("(load \"tests.shen\")");
+        Shen.install();
+        Shen.eval("(cd \"shen/Test Programs\")");
+        Shen.eval("(load \"README.shen\")");
+        Shen.eval("(load \"tests.shen\")");
     }
 
     public static void main(String... args) throws Throwable {
