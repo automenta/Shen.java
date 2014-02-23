@@ -131,7 +131,19 @@ public class RT {
 
         in that an ASM exception is thrown. Commenting out this code seems to eliminate the prolog bug.
 
-        Need to reinvestigate this maybeRecompile function at later stage
+        The place where the let recursive bug was addressed was :
+
+        https://github.com/artella-coding/Shen.java/commit/bdb0cc112f7d7482ba41c024f8f2f8d60237f1c1
+
+        and the transition to Shen 14 (which causes the problems with the prolog code) is from
+
+        https://github.com/artella-coding/Shen.java/commit/bdb0cc112f7d7482ba41c024f8f2f8d60237f1c1
+
+        to
+
+        https://github.com/artella-coding/Shen.java/commit/ff6d45d9f0793554d034760336c822db7afff00e
+
+        Need to reinvestigate the maybeRecompile function at later stage
         */
 
         /*
