@@ -85,11 +85,65 @@ public class RT {
             site.setTarget(symbol.fnGuard.guardWithTest(match.asType(type), fallback));
         }
         Object result = match.invokeWithArguments(args);
+
+        /*
+
+        TODO :
+
+        Originally the code was :
+
+            maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
+
+        However if we have this then loading the following into the repl gives :
+
+            (0-)
+            (define funcLetAndRecurse
+              X -> (let Z (- X 1)
+                     (if (= Z 1) (* 3 X) (funcLetAndRecurse Z))))
+
+            (1-)(funcLetAndRecurse 5)
+            -1
+
+        Then changed the code to :
+
+            try {
+                maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
+            } catch (Exception e) {
+            }
+
+        Now running the code above gives :
+
+            (0-)
+            (define funcLetAndRecurse
+              X -> (let Z (- X 1)
+                     (if (= Z 1) (* 3 X) (funcLetAndRecurse Z))))
+
+            (1-)(funcLetAndRecurse 5)
+            6
+
+        which is the correct result. However the following piece of code now breaks (under Shen 14 onwards) :
+
+            (defprolog mem
+              X (mode [X | _] -) <--;
+              X (mode [_ | Y] -) <-- (mem X Y);)
+
+            (prolog? (mem 1 [X | 2]) (return X))
+
+        in that an ASM exception is thrown. Commenting out this code seems to eliminate the prolog bug.
+
+        Need to reinvestigate this maybeRecompile function at later stage
+        */
+
+        /*
+        //See comments above
+
         //maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
         try {
             //maybeRecompile(type, symbol, result == null ? Object.class : result.getClass());
         } catch (Exception e) {
         }
+        */
+
         return result;
     }
 
