@@ -23,7 +23,7 @@ This port is loosely based on [`shen.clj`](https://github.com/hraberg/shen.clj),
 Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59435597e5761c72dbe9f0246fad0864/src/shen/Shen.java) using [MethodHandles](http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/MethodHandle.html) as a primitive. It's about 2x faster than `shen.clj`.
 
 Core requirements : 
-* [JDK 8 Early Access Release](https://jdk8.java.net/download.html). Tested with b128.
+* [JDK 8 Early Access Release](https://jdk8.java.net/archive/8u20-b14.html). Tested with 8u20 Build b14. Does NOT work with b15 or b16.
 * [Maven](http://maven.apache.org/). See [Maven project file](https://github.com/artella-coding/Shen.java/blob/master/pom.xml).
 
 Optional requirements : There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 
