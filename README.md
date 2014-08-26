@@ -23,7 +23,7 @@ This port is loosely based on [`shen.clj`](https://github.com/hraberg/shen.clj),
 Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59435597e5761c72dbe9f0246fad0864/src/shen/Shen.java) using [MethodHandles](http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/MethodHandle.html) as a primitive. It's about 2x faster than `shen.clj`.
 
 Core requirements : 
-* [JDK 8u20 Build b14](https://jdk8.java.net/archive/8u20-b14.html). Does NOT work with b15 or b16.
+* [JDK 8u40 Build b04](https://jdk8.java.net/download.html). Thanks to Vicente Arturo Romero Zaldivar of Oracle Corporation for fixing [bug JDK-8046357](https://bugs.openjdk.java.net/browse/JDK-8046357)
 * [Maven](http://maven.apache.org/). See [Maven project file](https://github.com/artella-coding/Shen.java/blob/master/pom.xml).
 
 Optional requirements : There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 
@@ -70,7 +70,7 @@ Optional requirements : There's an IntelliJ project, which requires [IDEA 12](ht
                  (/. X (integer? (/ X 3))))
     [0 3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60... etc]
 
-#### In Windows XP :
+#### In Windows XP & 7 :
 
 * Click "Download ZIP" button at https://github.com/artella-coding/Shen.java.
 Alternatively : https://github.com/artella-coding/Shen.java/archive/master.zip.
@@ -79,7 +79,7 @@ Alternatively : https://github.com/artella-coding/Shen.java/archive/master.zip.
 Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
 
 * Download jdk8 from https://jdk8.java.net/download.html
-
+  To extract in Windows 7 simply unzip.
   To extract in Windows XP :
 
     * Right click on jdk-8-fcs-bin-b129-windows-i586-07_feb_2014.exe 
