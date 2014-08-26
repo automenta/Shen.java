@@ -79,7 +79,9 @@ Alternatively : https://github.com/artella-coding/Shen.java/archive/master.zip.
 Suppose extracted directory is C:\Program Files\maven\apache-maven-2.2.1.
 
 * Download jdk8 from https://jdk8.java.net/download.html
+
   To extract in Windows 7 simply unzip.
+
   To extract in Windows XP :
 
     * Right click on jdk-8-fcs-bin-b129-windows-i586-07_feb_2014.exe 
