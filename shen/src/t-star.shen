@@ -125,16 +125,9 @@
   (mode [type X A] -) B Hyp <-- ! (unify A B) (th* X A Hyp);
   (mode [input+ A Stream] -) B Hyp <-- (bind C (demodulate A)) (unify B C) (th* Stream [stream in] Hyp);
   (mode [set Var Val] -) A Hyp <-- ! (th* Var symbol Hyp) ! (th* [value Var] A Hyp) (th* Val A Hyp);
-  (mode [<-sem F] -) C Hyp <-- ! 
-                               (th* F [A ==> B] Hyp)
-                               !
-                               (bind F&& (concat && F))
-                               !
-                               (th* F&& C [[F&& : B] | Hyp]);
   (mode [fail] -) symbol _ <--;
    X A Hyp <-- (t*-hyps Hyp NewHyp) (th* X A NewHyp);
   (mode [define F | X] -) A Hyp <-- ! (t*-def [define F | X] A Hyp);
-  (mode [defcc F | X] -) A Hyp <-- ! (t*-defcc [defcc F | X] A Hyp);
   (mode [defmacro | _] -) unit Hyp <-- !;
   (mode [process-datatype | _] -) symbol _ <--;
   (mode [synonyms-help | _] -) symbol _ <--;
@@ -172,7 +165,7 @@
 (define show-p 
   [X : A] -> (output "~R : ~R" X A)
   P -> (output "~R" P))
- 
+
 \* Enumerate assumptions. *\
 (define show-assumptions
   [] _ -> skip
@@ -291,89 +284,6 @@
   _ _ X A <-- (bind X (value A));)
 
 (defprolog remember
-  A Pattern <-- (is B (set A [Pattern | (value A)]));)   
-
-(defprolog t*-defcc
- (mode [defcc F { [list A] ==> B } | Rest] -) C Hyp 
-    <-- (t*-defcc-h [defcc F (ue (demodulate [[list A] ==> B])) 
-                    | (ue (split_cc_rules false (plug-wildcards Rest) []))] 
-                    C 
-                    Hyp);)
-
-(define plug-wildcards
-  [X | Y] -> (map (function plug-wildcards) [X | Y])
-  X -> (gensym (intern "X"))   where (= X _)
-  X -> X)
-          
-(defprolog t*-defcc-h 
-   (mode [defcc F [[list A] ==> B] | Rules] -) C Hyp        
-    <-- !
-        (tc-rules F Rules [list A] B [[F : [[list A] ==> B]] | Hyp] 1)
-        (unify C [[list A] ==> B])
-        (bind Declare (declare F [[list A] ==> B]));)
-                                 
-(defprolog tc-rules
-  _ (mode [] -) _ _ _ _ <--;
-  F (mode [Rule | Rules] -) (mode [list A] -) B Hyps N
-  <-- (tc-rule F Rule A B Hyps N)
-      (is M (+ N 1))
-      !
-      (tc-rules F Rules [list A] B Hyps M);)
-
-(defprolog tc-rule
-  _ Rule A B Hyps _ <-- (check-defcc-rule Rule A B Hyps);
-  F _ _ _ _ N <-- (bind Err (error "type error in rule ~A of ~A" N F));)
-
-(defprolog check-defcc-rule 
-  (mode [Syntax Semantics] -) A B Hyps <-- (syntax-hyps Syntax Hyps SynHyps A) 
-                                           !
-                                           (syntax-check Syntax A SynHyps)
-                                           !
-                                           (semantics-check Semantics B SynHyps);)
-      
-(defprolog syntax-hyps
-  (mode [] -) SynHyps SynHyps A <--;
-  (mode [X | Y] -) Hyps [[X : A] | SynHyps] A <-- (when (ue? X))
-                                                  !
-                                                  (syntax-hyps Y Hyps SynHyps A);
-  (mode [_ | Y] -) Hyps SynHyps A <-- (syntax-hyps Y Hyps SynHyps A);)  
-                                     
-                                  
-(defprolog syntax-check
-  (mode [] -) _ _ <--;
-  (mode [X | Syntax] -) A Hyps <-- (fwhen (grammar_symbol? X))
-                                   !
-                                   (t* [X : [[list A] ==> C]] Hyps)
-                                   !
-                                   (syntax-check Syntax A Hyps);
-  (mode [X | Syntax] -) A Hyps <-- (t* [X : A] Hyps)
-                                   !
-                                   (syntax-check Syntax A Hyps);)
+  A Pattern <-- (is B (set A [Pattern | (value A)]));)  )
   
-(defprolog semantics-check
-  (mode [where P Q] -) B Hyps <-- ! 
-                                  (t* [(curry P) : boolean] Hyps)
-                                  (t* [(curry Q) : B] Hyps);
-  Semantics B Hyps <-- (is Semantics* (curry (rename-semantics Semantics)))
-                       (t* [Semantics* : B] Hyps);)
-                       
-(define rename-semantics
-  [X | Y] -> [(rename-semantics X) | (rename-semantics Y)]
-  X -> [<-sem X]  where (grammar_symbol? X)
-  X -> X)   
-  )  
-
-"(defprolog syntax-check
-  (mode [] -) _ _ <--;
-  (mode [X | Syntax] -) A Hyps <-- (fwhen (grammar_symbol? X))
-                                   !
-                                   (t* [X : [[list B] ==> C]] Hyps)
-                                   !
-                                   (bind X&& (concat && X))
-                                   !
-                                   (t* [X&& : [list A]] [[X&& : [list B]] | Hyps]) 
-                                   !
-                                   (syntax-check Syntax A Hyps);
-  (mode [X | Syntax] -) A Hyps <-- (t* [X : A] Hyps)
-                                   !
-                                   (syntax-check Syntax A Hyps);)"
+  

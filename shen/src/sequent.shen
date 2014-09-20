@@ -147,8 +147,8 @@
 
 (define remember-datatype 
   [D | _] -> (do (set *datatypes* (adjoin D (value *datatypes*)))
-                  (set *alldatatypes* (adjoin D (value *alldatatypes*))) 
-                      D))
+                 (set *alldatatypes* (adjoin D (value *alldatatypes*))) 
+                 D))
 
 (define rules->horn-clauses
    _ [] -> []
@@ -261,8 +261,11 @@
 (define synonyms-help
   [] -> (demodulation-function (value *tc*) 
                       (mapcan (function demod-rule) (value *synonyms*)))
-  [S1 S2 | S] -> (do (pushnew [S1 S2] *synonyms*)
-                     (synonyms-help S))
+  [S1 S2 | S] -> (let Vs (difference (extract_vars S2) (extract_vars S1))
+                      (if (empty? Vs)
+                          (do (pushnew [S1 S2] *synonyms*)
+                              (synonyms-help S))
+                          (free_variable_warnings S2 Vs)))
   _ -> (error "odd number of synonyms~%"))
 
 (define pushnew

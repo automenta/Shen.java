@@ -79,7 +79,7 @@
 (define input+ 
   Type Stream -> (let Mono? (monotype Type)
                       Input (read Stream)                      
-                      (if (= false (typecheck Input Type))
+                      (if (= false (typecheck Input (demodulate Type)))
                           (error "type error: ~R is not of type ~R~%" Input Type)
                           (eval-kl Input))))
 
@@ -89,12 +89,17 @@
 
 (define read
   Stream -> (hd (read-loop Stream (read-byte Stream) [])))
+  
+(define it 
+  -> (value *it*))  
 
 (define read-loop
+  _ 94 Bytes -> (error "read aborted")
   _ -1 Bytes -> (if (empty? Bytes)
                     (simple-error "error: empty stream")
                     (compile (function <st_input>) Bytes (/. E E)))
   Stream Byte Bytes -> (let AllBytes (append Bytes [Byte])
+                            It (record-it AllBytes)
                             Read (compile (function <st_input>) AllBytes (/. E nextbyte))
                             (if (or (= Read nextbyte) (empty? Read))
                                 (read-loop Stream (read-byte Stream) AllBytes)
@@ -113,10 +118,28 @@
                          (compile (function <st_input>) Bytes (/. E E)))
   Byte _ Stream -> (error "line read aborted")  where (= Byte (hat))
   Byte Bytes Stream -> (let Line (compile (function <st_input>) Bytes (/. E nextline))
-                           (if (or (= Line nextline) (empty? Line))
-                               (lineread-loop (read-byte Stream) (append Bytes [Byte]) Stream)
-                               Line))	where (element? Byte [(newline) (carriage-return)])
+                            It (record-it Bytes)
+                            (if (or (= Line nextline) (empty? Line))
+                                (lineread-loop (read-byte Stream) (append Bytes [Byte]) Stream)
+                                Line))	where (element? Byte [(newline) (carriage-return)])
   Byte Bytes Stream -> (lineread-loop (read-byte Stream) (append Bytes [Byte]) Stream))
+
+(define record-it
+  Bytes -> (let TrimLeft (trim-whitespace Bytes)
+                TrimRight (trim-whitespace (reverse TrimLeft))
+                Trimmed (reverse TrimRight)
+                (record-it-h Trimmed)))
+                
+(define trim-whitespace
+  [Byte | Bytes] -> (trim-whitespace Bytes)   where (element? Byte [9 10 13 32])
+  Bytes -> Bytes)               
+                
+(define record-it-h
+  Bytes -> (do (set *it* (cn-all (map (function n->string) Bytes))) Bytes))
+
+(define cn-all
+  [] -> ""
+  [S | Ss] -> (cn S (cn-all Ss)))
 
 (define read-file
   File -> (let Bytelist (read-file-as-bytelist File)

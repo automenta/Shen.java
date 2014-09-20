@@ -101,7 +101,7 @@
 (declare cd [string --> string]) 
 (declare close [[stream A] --> [list B]])
 (declare cn [string --> [string --> string]])
-(declare compile [[[list A] ==> B] --> [[list A] --> [[[list A] --> B] --> B]]])
+(declare compile [[A ==> B] --> [A --> [[A --> B] --> B]]])
 (declare cons? [A --> boolean])
 (declare destroy [[A --> B] --> symbol])
 (declare difference [[list A] --> [[list A] --> [list A]]]) 
@@ -128,6 +128,7 @@
 (declare hdv [[vector A] --> A])
 (declare hdstr [string --> string])
 (declare if [boolean --> [A --> [A --> A]]]) 
+(declare it [--> string])
 (declare implementation [--> string])
 (declare include [[list symbol] --> [list symbol]])
 (declare include-all-but [[list symbol] --> [list symbol]]) 
@@ -135,6 +136,7 @@
 (declare insert [A --> [string --> string]])
 (declare integer? [A --> boolean])
 (declare intersection [[list A] --> [[list A] --> [list A]]])
+(declare kill [--> A])
 (declare language [--> string])  
 (declare length [[list A] --> number])
 (declare limit [[vector A] --> number])
@@ -216,7 +218,10 @@
 (declare / [number --> [number --> number]])
 (declare - [number --> [number --> number]])
 (declare * [number --> [number --> number]])
-(declare == [A --> [B --> boolean]]) )
+(declare == [A --> [B --> boolean]]) 
+(declare in-> [[A ==> B] --> A])
+(declare <-out [[A ==> B] --> B])
+)
 
 
 

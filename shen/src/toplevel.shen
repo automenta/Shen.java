@@ -124,7 +124,7 @@
 
 (define toplineread_loop
   Byte _ -> (error "line read aborted")  where (= Byte (hat))
-  Byte Bytes -> (let Line (compile (function <st_input>) Bytes (/. E nextline))
+  Byte Bytes -> (let Line (compile (function <st_input>) (record-it Bytes) (/. E nextline))
                     (if (or (= Line nextline) (empty? Line))
                         (toplineread_loop (read-byte (stinput)) (append Bytes [Byte]))
                         (@p Line Bytes)))

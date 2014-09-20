@@ -374,7 +374,7 @@
 
 (define subst
   X Y Y -> X
-  X Y [W | Z] -> [(subst X Y W) | (subst X Y Z)]
+  X Y Z -> (map (/. W (subst X Y W)) Z)  where (cons? Z)
   _ _ Z -> Z)
 
 (define explode

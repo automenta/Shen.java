@@ -1,4 +1,4 @@
-# 神.java | Shen for Java (Shen 15)
+# 神.java | Shen for Java (Shen 16)
 
 http://shenlanguage.org/
 
@@ -23,7 +23,7 @@ This port is loosely based on [`shen.clj`](https://github.com/hraberg/shen.clj),
 Started as an [interpreter](https://github.com/hraberg/Shen.java/blob/2359095c59435597e5761c72dbe9f0246fad0864/src/shen/Shen.java) using [MethodHandles](http://docs.oracle.com/javase/7/docs/api/java/lang/invoke/MethodHandle.html) as a primitive. It's about 2x faster than `shen.clj`.
 
 Core requirements : 
-* [JDK 8u40 Build b04](https://jdk8.java.net/download.html). Thanks to Vicente Arturo Romero Zaldivar of Oracle Corporation for fixing [bug JDK-8046357](https://bugs.openjdk.java.net/browse/JDK-8046357)
+* [JDK 8u40 Build b06](https://jdk8.java.net/download.html). Thanks to Vicente Arturo Romero Zaldivar of Oracle Corporation for fixing [bug JDK-8046357](https://bugs.openjdk.java.net/browse/JDK-8046357)
 * [Maven](http://maven.apache.org/). See [Maven project file](https://github.com/artella-coding/Shen.java/blob/master/pom.xml).
 
 Optional requirements : There's an IntelliJ project, which requires [IDEA 12](http://www.jetbrains.com/idea/download/index.html). 

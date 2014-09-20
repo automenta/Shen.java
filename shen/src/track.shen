@@ -72,7 +72,7 @@
 (define track-function
   [defun F Params Body]
    -> (let KL [defun F Params (insert-tracking-code F Params Body)]
-           Ob (eval KL)
+           Ob (eval-kl KL)
            Tr (set *tracking* [Ob | (value *tracking*)])
            Ob))
 

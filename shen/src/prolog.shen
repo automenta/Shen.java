@@ -432,7 +432,7 @@
   N -> (address-> (address-> (absvector 2) 0 pvar) 1 N))  
 
 (define pvar?
-  X -> (and (absvector? X) (= (<-address X 0) pvar)))
+  X -> (trap-error (and (absvector? X) (= (<-address X 0) pvar)) (/. E false)))
 
 (define bindv
   Var Val N -> (let Vector (<-address (value *prologvectors*) N)

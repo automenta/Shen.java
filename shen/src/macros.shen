@@ -130,22 +130,6 @@
 (define intern-type
   F -> (intern (cn "type#" (str F))))
 
-"(defcc <defmacro>
- <name> <macrorules> := [define <name> | <macrorules>];)
-
-(defcc <macrorules>
-  <macrorule> <macrorules>;
-  <macrorule> := (append <macrorule> [(protect X) -> (protect X)]);)
-
-(defcc <macrorule>
-  <patterns> -> <macroaction> where <guard>;
-  <patterns> -> <macroaction>;
-  <patterns> <- <macroaction> where <guard>;
-  <patterns> <- <macroaction>;)
-
-(defcc <macroaction>
-  <action> := [[walk [function macroexpand] <action>]];)"
-
 (define @s-macro
   [@s W X Y | Z] -> [@s W (@s-macro [@s X Y | Z])]
   [@s X Y] -> (let E (explode X)
