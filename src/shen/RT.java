@@ -243,16 +243,19 @@ public class RT {
         candidates = bestMatchingMethods(type, candidates);
         Shen.debug("applicable candidates: %s", candidates);
         MethodHandle match = candidates.get(candidates.size() - 1).asType(type);
+        final int parameterCount = type.parameterCount();
         for (int i = candidates.size() - 1; i > 0; i--) {
             MethodHandle fallback = candidates.get(i);
             MethodHandle target = candidates.get(i - 1);
             Class<?> differentType = Shen.find(target.type().parameterList(), fallback.type().parameterList(), (x, y) -> !x.equals(y));
             int firstDifferent = target.type().parameterList().indexOf(differentType);
             if (firstDifferent == -1) firstDifferent = 0;
-            Shen.debug("switching on %d argument type %s", firstDifferent, differentType);
-            Shen.debug("target: %s ; fallback: %s", target, fallback);
+            if (Shen.isDebug()) {
+                Shen.debug("switching on %d argument type %s", firstDifferent, differentType);
+                Shen.debug("target: %s ; fallback: %s", target, fallback);
+            }
             MethodHandle test = checkClass.bindTo(differentType);
-            test = dropArguments(test, 0, type.dropParameterTypes(firstDifferent, type.parameterCount()).parameterList());
+            test = dropArguments(test, 0, type.dropParameterTypes(firstDifferent, parameterCount).parameterList());
             test = test.asType(test.type().changeParameterType(firstDifferent, type.parameterType(firstDifferent)));
             match = guardWithTest(test, target.asType(type), match);
         }
@@ -321,7 +324,8 @@ public class RT {
         return Shen.some(stream(methods), m -> {
             try {
                 if (m.getName().equals(method)) {
-                    m.setAccessible(true);
+                    if (!m.isAccessible())
+                        m.setAccessible(true);
                     MethodHandle mh = (m instanceof Method) ? lookup.unreflect((Method) m) : lookup.unreflectConstructor((Constructor) m);
                     mh.asType(methodType(type.returnType(), Shen.vec(type.parameterList().stream()
                             .map(c -> c.equals(Long.class) ? Integer.class : c.equals(long.class) ? int.class : c))));
@@ -341,8 +345,16 @@ public class RT {
         return insertArguments(link, 0, site, name).asCollector(Object[].class, site.type().parameterCount());
     }
 
+    final static int MAX_ARITY = 16;
+    final static MethodType[] mtByArity = new MethodType[MAX_ARITY];
+
     static MethodHandle reLinker(String name, int arity) throws IllegalAccessException {
-        MutableCallSite reLinker = new MutableCallSite(genericMethodType(arity));
+        MethodType mt = mtByArity[arity];
+        if (mt == null) {
+            mt = mtByArity[arity] = genericMethodType(arity);
+        }
+
+        MutableCallSite reLinker = new MutableCallSite(mt);
         return relinkOn(IllegalStateException.class, reLinker.dynamicInvoker(), linker(reLinker, toBytecodeName(name)));
     }
 

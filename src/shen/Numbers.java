@@ -21,7 +21,7 @@ import static sun.invoke.util.BytecodeName.toSourceName;
 
 public class Numbers implements Opcodes {
     static final long tag = 1, real = 0, integer = 1;
-    static final Set<Symbol> operators = new HashSet<>();
+    static final Set<Symbol> operators = new HashSet<>(16);
 
     // longs are either 63 bit signed integers or doubleToLongBits with bit 0 used as tag, 0 = double, 1 = long.
     // Java: 5ms, Shen.java: 10ms, Boxed Java: 15ms. Which ever branch that starts will be faster for some reason.

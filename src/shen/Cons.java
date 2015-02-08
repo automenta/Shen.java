@@ -1,5 +1,9 @@
 package shen;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import java.util.*;
 
 import static java.util.Collections.EMPTY_LIST;
@@ -18,7 +22,8 @@ public class Cons extends AbstractCollection {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof List && isList()) //noinspection unchecked
-            return Shen.vec(toList().stream().map(Numbers::maybeNumber)).equals(o);
+            return Iterables.elementsEqual(this, ((List)o));
+            //return Shen.vec(toList().stream().map(Numbers::maybeNumber)).equals(o);
         if (o == null || getClass() != o.getClass()) return false;
         //noinspection ConstantConditions
         Cons cons = (Cons) o;
@@ -36,7 +41,7 @@ public class Cons extends AbstractCollection {
     @SuppressWarnings("NullableProblems")
     public Iterator iterator() {
         if (!isList()) throw new IllegalStateException("cons pair is not a list: " + this);
-        return new ConsIterator();
+        return new ConsIterator(this);
     }
 
     public int size() {
@@ -65,8 +70,13 @@ public class Cons extends AbstractCollection {
         return cons;
     }
 
-    class ConsIterator implements Iterator {
-        Cons cons = Cons.this;
+    public static class ConsIterator implements Iterator {
+
+        private Cons cons;
+
+        public ConsIterator(Cons c) {
+            this.cons = c;
+        }
 
         public boolean hasNext() {
             return cons != null;

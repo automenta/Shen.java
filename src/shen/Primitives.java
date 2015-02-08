@@ -51,9 +51,22 @@ public class Primitives {
         return x instanceof Cons;
     }
 
+    public static class SimpleErrorException extends RuntimeException {
+        public static final SimpleErrorException INVISIBLE = new SimpleErrorException("");
+
+        public SimpleErrorException(String s) {
+            super(s, null, false, false);
+        }
+    }
+
     public static Object simple_error(String s) {
-        throw new RuntimeException(s, null, false, false) {
-        };
+        if (Shen.isDebug()) {
+            //constant singleton for speed
+            throw SimpleErrorException.INVISIBLE;
+        }
+        else {
+            throw new SimpleErrorException(s);
+        }
     }
 
     public static String error_to_string(Throwable e) {
@@ -94,7 +107,7 @@ public class Primitives {
     }
 
     public static boolean absvectorP(Object x) {
-        return x.getClass() == Object[].class;
+        return x.getClass().equals(Object[].class);
     }
 
     public static Object LT_address(Object[] vector, long n) {

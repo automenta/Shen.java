@@ -4,7 +4,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestProgramsTest {
-    @Test @Ignore
+    @Test
     public void test_programs() throws Throwable {
         Shen.install();
         Shen.eval("(cd \"shen/Test Programs\")");

@@ -11,6 +11,7 @@ import java.util.jar.Manifest;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.lang.ClassLoader.getSystemClassLoader;
 import static java.lang.ClassLoader.getSystemResources;
@@ -146,9 +147,7 @@ public class Shen {
     }
 
     static void debug(String format, Object... args) {
-        if (isDebug()) err.println(format(format,
-                stream(args).map(o -> o != null && o.getClass() == Object[].class
-                        ? deepToString((Object[]) o) : o).toArray()));
+        if (isDebug()) err.println(format + " " + Arrays.toString(args));
     }
 
     @SafeVarargs
@@ -186,11 +185,35 @@ public class Shen {
     static <T, R> Stream<R> map(Stream<T> c1, Stream<T> c2, BiFunction<T, T, R> f) {
         Iterator<T> it1 = c1.iterator();
         Iterator<T> it2 = c2.iterator();
-        List<R> result = new ArrayList<R>();
-        while (it1.hasNext() && it2.hasNext()) {
-            result.add(f.apply(it1.next(), it2.next()));
-        }
-        return result.stream();
+//        List<R> result = new ArrayList<R>();
+//        while (it1.hasNext() && it2.hasNext()) {
+//            result.add(f.apply(it1.next(), it2.next()));
+//        }
+
+        return StreamSupport.stream(new Spliterator<R>() {
+            @Override
+            public boolean tryAdvance(Consumer<? super R> action) {
+                if ((!it1.hasNext()) || (!it2.hasNext())) return false;
+                action.accept(f.apply(it1.next(), it2.next()));
+                return true;
+            }
+
+            @Override
+            public Spliterator<R> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return 0;
+            }
+
+            @Override
+            public int characteristics() {
+                return 0;
+            }
+        }, false);
+
     }
 
     static <T> boolean every(Collection<T> c1, Collection<T> c2, BiPredicate<T, T> pred) {
